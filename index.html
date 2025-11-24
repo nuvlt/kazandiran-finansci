@@ -3,161 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Pro Volatilite</title>
+    <title>Kazandıran Finansçı - Heyecan Modu</title>
     <style>
-        /* CSS Kodu - AYNI */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1e3a; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #fff;
-        }
-        .oyun-container {
-            width: 800px;
-            max-width: 95%;
-            background-color: #0f274a;
-            border: 4px solid #1e90ff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 30px rgba(30, 144, 255, 0.5);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #1e90ff;
-        }
-        .title {
-            font-size: 32px;
-            font-weight: bold;
-            color: #00ff7f;
-            text-shadow: 0 0 5px #00ff7f;
-        }
-        .bakiye {
-            font-size: 24px;
-            color: #fff;
-            background-color: #0f274a;
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #1e90ff;
-        }
-
-        .grafik-alani {
-            position: relative;
-            height: 350px;
-            background-color: #0a1728;
-            border: 2px solid #00ff7f;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            background-image: 
-                linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px);
-            background-size: 40px 40px;
-            overflow: hidden;
-        }
-        
-        .carpan-gosterge {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 56px;
-            font-weight: 800;
-            color: #00ff7f;
-            text-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
-            z-index: 10;
-            background-color: rgba(10, 23, 40, 0.7);
-            padding: 5px 20px;
-            border-radius: 10px;
-            border: 1px solid #1e90ff;
-            font-variant-numeric: tabular-nums;
-        }
+        /* CSS AYNI KALDI */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
+        .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
+        .title { font-size: 32px; font-weight: bold; color: #00ff7f; text-shadow: 0 0 5px #00ff7f; }
+        .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; }
+        .grafik-alani { position: relative; height: 350px; background-color: #0a1728; border: 2px solid #00ff7f; border-radius: 8px; margin-bottom: 20px; background-image: linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px); background-size: 40px 40px; overflow: hidden; }
+        .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; }
         .carpan-gosterge.dusuyor { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.4); }
         .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 20px rgba(255, 77, 77, 0.6); }
-
-        #grafikCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .kontrol-paneli {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-        }
-
-        .hiz-ayarlari {
-            grid-column: 1 / span 3;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .hiz-ayarlari button {
-            background-color: #1e3d6d;
-            color: #fff;
-            padding: 8px 15px;
-            border: 1px solid #1e90ff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+        #grafikCanvas { position: absolute; top: 0; left: 0; }
+        .kontrol-paneli { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .hiz-ayarlari { grid-column: 1 / span 3; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .hiz-ayarlari button { background-color: #1e3d6d; color: #fff; padding: 8px 15px; border: 1px solid #1e90ff; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
         .hiz-ayarlari button:hover { background-color: #1a5c96; }
         .hiz-ayarlari .aktif { background-color: #1e90ff; border-color: #fff; font-weight: bold; }
-
-        .sonuclar-alani {
-            background-color: #0a1728;
-            border: 2px solid #1e90ff;
-            border-radius: 5px;
-            padding: 10px;
-            height: 150px;
-            overflow-y: auto;
-        }
+        .sonuclar-alani { background-color: #0a1728; border: 2px solid #1e90ff; border-radius: 5px; padding: 10px; height: 150px; overflow-y: auto; }
         .sonuclar-liste { display: flex; flex-wrap: wrap; gap: 5px; }
-        .sonuc-item {
-            background-color: #4b0082;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-        }
+        .sonuc-item { background-color: #4b0082; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
         .sonuc-item.kayip { background-color: #3d0d0d; color: #ff6666; border: 1px solid #ff4d4d; }
         .sonuc-item.kazanc { background-color: #0d3d1e; color: #66ff99; border: 1px solid #00ff7f; }
-
         .bahis-kontrol { display: flex; flex-direction: column; gap: 8px; }
         .bahis-butonlari { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .bahis-butonlari button {
-            background-color: #333; color: #fff; padding: 10px 0; border: 1px solid #666; border-radius: 5px; cursor: pointer;
-        }
+        .bahis-butonlari button { background-color: #333; color: #fff; padding: 10px 0; border: 1px solid #666; border-radius: 5px; cursor: pointer; }
         .bahis-secim { display: flex; gap: 5px; }
-        .bahis-secim button {
-            flex-grow: 1; padding: 10px 0; font-size: 16px; background-color: #1e3d6d; border: 1px solid #1e90ff; color: #fff; border-radius: 5px; cursor: pointer;
-        }
-
+        .bahis-secim button { flex-grow: 1; padding: 10px 0; font-size: 16px; background-color: #1e3d6d; border: 1px solid #1e90ff; color: #fff; border-radius: 5px; cursor: pointer; }
         .oyun-butonlari { display: flex; flex-direction: column; gap: 8px; }
-        #oynaToplaBtn {
-            background-color: #00cc66; color: white; padding: 20px; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #00994d;
-        }
+        #oynaToplaBtn { background-color: #00cc66; color: white; padding: 20px; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #00994d; }
         #oynaToplaBtn:active { box-shadow: 0 2px #00994d; transform: translateY(3px); }
         #oynaToplaBtn.topla-modu { background-color: #ffaa00; box-shadow: 0 5px #cc8800; }
         #oynaToplaBtn.topla-modu:active { box-shadow: 0 2px #cc8800; }
-
         .oto-strateji { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        #otoStratejiSwitch {
-            width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer;
-        }
+        #otoStratejiSwitch { width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer; }
         #otoStratejiSwitch.on { background-color: #1e90ff; }
-        #otoStratejiSwitch .slider {
-            width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s;
-        }
+        #otoStratejiSwitch .slider { width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s; }
         #otoStratejiSwitch.on .slider { transform: translateX(30px); }
         .not { grid-column: 1 / span 3; font-size: 11px; color: #8899aa; text-align: center; margin-top: 5px; }
     </style>
@@ -215,11 +97,9 @@
 </div>
 
 <script>
-    // --- OYUN AYARLARI ---
     const MAX_KAZANC = 10000000.00;
-    const GRAFIK_NOKTA_SIKLIGI = 1; 
-    let UPDATE_INTERVAL = 200; // 200ms (Yavaş ve net)
-
+    let UPDATE_INTERVAL = 150; // Grafik güncelleme hızı (ms)
+    
     // Değişkenler
     let bakiye = 100.00;
     let aktifBahis = 10.00;
@@ -229,10 +109,11 @@
     let animasyonFrameId;
     let sonGuncellemeZamani = 0;
     
-    // Matematiksel Değişkenler (Volatilite)
+    // Volatilite Değişkenleri
     let grafikNoktalari = []; 
-    let momentum = 0; // Fiyatın ivmesi (Hız)
-    let trendHedefi = 1.5; // Fiyatın gitmek istediği gizli nokta
+    let dalgaFazı = 0; // Sinüs dalgası için
+    let anaTrend = 0; // Yukarı gidiş eğilimi
+    let piyasaDurumu = 0; // -1 (Ayı), 0 (Yatay), 1 (Boğa)
 
     // DOM
     const uiBakiye = document.getElementById('bakiyeGosterge');
@@ -274,9 +155,10 @@
         mevcutCarpan = 1.00;
         grafikNoktalari = [{val: 1.00}]; 
         
-        // Başlangıç Değerleri
-        momentum = 0.01; // Hafif yukarı başla
-        trendHedefi = 1.50; // İlk hedef
+        // Reset
+        dalgaFazı = Math.random() * 10;
+        anaTrend = 0.01; 
+        piyasaDurumu = 1; // Pozitif başla
 
         uiBtn.textContent = "TOPLA";
         uiBtn.classList.add('topla-modu');
@@ -292,64 +174,62 @@
         if (oyunDurumu !== 'oynuyor') return;
 
         let hedeflenenSure = UPDATE_INTERVAL / oyunHiziCarpani;
-        
         if (zaman - sonGuncellemeZamani > hedeflenenSure) {
             sonGuncellemeZamani = zaman;
             birAdimIlerle();
         }
-
         requestAnimationFrame(oyunDongusu);
     }
 
     function birAdimIlerle() {
-        // --- PRO VOLATİLİTE ALGORİTMASI ---
-        
-        // 1. Rastgele Kuvvet (Piyasa Gürültüsü)
-        // -0.02 ile +0.02 arasında değişir.
-        let piyasaGurultusu = (Math.random() - 0.5) * 0.04; 
-        
-        // 2. Momentum Değişimi
-        // Momentum aniden değişmez, yavaşça değişir (İvme mantığı)
-        momentum += piyasaGurultusu;
-        
-        // Momentum Sınırla (Çok aşırı hızlanmasın)
-        if (momentum > 0.05) momentum = 0.05;
-        if (momentum < -0.04) momentum = -0.04; // Aşağı düşüş hızı
-        
-        // 3. Yerçekimi (Gravity) - RTP Koruması
-        // Çarpan yükseldikçe, aşağı çekme kuvveti artar.
-        // Çarpan 1.00 altındaysa, yukarı itme kuvveti oluşur (Toparlanma şansı)
-        let yerCekimi = 0;
-        if (mevcutCarpan > 2.0) yerCekimi = -0.01 * (mevcutCarpan / 2);
-        if (mevcutCarpan < 0.8) yerCekimi = 0.015; // Dipten dönüş desteği
+        // --- "HEYECANLI DALGALANMA" MATEMATİĞİ ---
 
-        // Yeni Değeri Hesapla
-        let degisim = momentum + yerCekimi;
+        // 1. Dalga Hareketi (İniş-Çıkış Hissi)
+        dalgaFazı += 0.2; 
+        let dalgaEtkisi = Math.sin(dalgaFazı) * 0.05; // -0.05 ile +0.05 arası sallanır
+        
+        // 2. Rastgele Gürültü (Piyasa Belirsizliği)
+        let gurultu = (Math.random() - 0.5) * 0.08; 
+        
+        // 3. Ana Trend (Zamanla artma eğilimi ama garanti değil)
+        // Eğer çarpan düşükse (0.50x), yukarı çıkma isteği artar (Dip tepkisi)
+        if (mevcutCarpan < 0.80) anaTrend += 0.002;
+        else anaTrend = 0.015; // Normal büyüme hızı
+
+        // Çarpanı Hesapla
+        let degisim = anaTrend + dalgaEtkisi + gurultu;
+        
+        // Bazen aniden aşağı çek (Korku faktörü)
+        if (Math.random() < 0.15) {
+            degisim -= 0.15; // Sert düşüş
+        }
+
         let yeniDeger = mevcutCarpan + degisim;
         
-        // Min 0.10'a kadar düşebilir (0.00 olamaz oyun sürerken)
-        if (yeniDeger < 0.10) {
-            yeniDeger = 0.10;
-            momentum = 0.02; // Dipten sekme efekti
+        // Asla 0.10 altına düşmesin (Oyunu sürdürmek için)
+        // 0.00 sadece "Crash" kararında olur.
+        if (yeniDeger < 0.15) {
+            yeniDeger = 0.15;
+            // Dipten sert sekme şansı
+            if(Math.random() < 0.5) anaTrend = 0.05; 
         }
-        
+
         mevcutCarpan = yeniDeger;
 
         // --- BİTİŞ & CRASH KONTROLLERİ ---
         
-        // Crash Olasılığı (RTP Dengesi)
-        // Çarpan yükseldikçe patlama riski artar.
-        // Çarpan 1.00 altındayken bile patlayabilir (Zararına kapanış)
-        let patlamaRiski = 0.01; // %1 taban risk
+        // Grafik 0.00'a vurursa veya şanssızlık olursa PATLAR
+        // RTP'yi dengelemek için çarpan yükseldikçe patlama riski artar
+        let patlamaSansi = 0.005; // %0.5 temel risk
         
-        if (mevcutCarpan > 1.5) patlamaRiski = 0.03;
-        if (mevcutCarpan > 3.0) patlamaRiski = 0.08;
-        if (mevcutCarpan > 10.0) patlamaRiski = 0.20;
+        // 1.00 altındayken bile patlayabilir (Zararına kapanış)
+        if (mevcutCarpan < 0.50) patlamaSansi = 0.02; // Dipte risk artar
+        
+        if (mevcutCarpan > 2.0) patlamaSansi = 0.02;
+        if (mevcutCarpan > 5.0) patlamaSansi = 0.05;
+        if (mevcutCarpan > 10.0) patlamaSansi = 0.10;
 
-        // Eğer momentum aşağı ise ve çarpan düşükse, "Panic Sell" crash riski
-        if (mevcutCarpan < 0.7 && momentum < -0.01) patlamaRiski = 0.05;
-
-        if (Math.random() < patlamaRiski) {
+        if (Math.random() < patlamaSansi) {
              mevcutCarpan = 0.00; // CRASH!
              oyunuBitir(false);
              return;
@@ -380,37 +260,25 @@
     function oyunuBitir(otomatikKazandi) {
         oyunDurumu = 'bitti';
         cancelAnimationFrame(animasyonFrameId);
-        
         uiBtn.textContent = "OYNA";
         uiBtn.classList.remove('topla-modu');
 
-        // Eğer kullanıcı manuel topladıysa (otomatikKazandi = true)
-        // VE çarpan 1.00 üzerindeyse kazanır.
-        // Eğer çarpan 0.31x ise ve topladıysa, 3.1 TL alır (Zarar eder ama kalanını kurtarır)
-        
         if (otomatikKazandi || (mevcutCarpan > 0 && mevcutCarpan !== 0.00)) {
-            // Kazanç/İade Hesapla
             let geriOdeme = aktifBahis * mevcutCarpan;
-            
-            // Eğer kar ettiyse (carpan > 1) kesinti uygula
             if (mevcutCarpan > 1.00) {
                 let kar = geriOdeme - aktifBahis;
-                let netKar = kar * 0.68; // %32 kesinti
+                let netKar = kar * 0.68;
                 geriOdeme = aktifBahis + netKar;
-                sonucEkle(mevcutCarpan, true); // Yeşil Sonuç
+                sonucEkle(mevcutCarpan, true); 
             } else {
-                // Zararına bozdurma
-                sonucEkle(mevcutCarpan, false); // Kırmızı Sonuç (Çünkü zarar)
+                sonucEkle(mevcutCarpan, false); 
             }
-            
             bakiye += geriOdeme;
-            
         } else {
-            // Crash Oldu (0.00x)
+            // Crash
             mevcutCarpan = 0.00; 
             uiCarpan.textContent = "CRASH";
             uiCarpan.classList.add('crash');
-            
             grafikNoktalari.push({ val: 0.00 });
             drawGraph();
             sonucEkle(0.00, false);
@@ -422,20 +290,16 @@
         if(oyunDurumu === 'bekliyor' || oyunDurumu === 'bitti') {
             oyunuBaslat();
         } else if(oyunDurumu === 'oynuyor') {
-            // Toplama işlemi: 1.00x altında da toplayabilir (Bakiye kurtarma)
             oyunuBitir(true); 
         }
     }
 
     function sonucEkle(val, win) {
         const d = document.createElement('div');
-        // Eğer 1.00 üstü ve win ise yeşil, yoksa kırmızı
         let stil = (val >= 1.00 && win) ? 'kazanc' : 'kayip';
         d.className = `sonuc-item ${stil}`;
-        
         if (val === 0.00) d.innerText = "CRASH";
         else d.innerText = val.toFixed(2) + 'x';
-        
         uiListe.prepend(d);
         if(uiListe.children.length > 20) uiListe.lastElementChild.remove();
     }
@@ -453,14 +317,11 @@
         const h = canvas.height;
         const padding = 30;
 
-        // Çizgi
         ctx.beginPath();
         ctx.lineWidth = 3;
         
-        // Çizgi Rengi (Anlık duruma göre)
         if (mevcutCarpan < 1.00) ctx.strokeStyle = "#ffaa00";
         else ctx.strokeStyle = "#00ff7f";
-        
         if (grafikNoktalari[grafikNoktalari.length-1].val <= 0.01) ctx.strokeStyle = "#ff4d4d";
 
         grafikNoktalari.forEach((p, i) => {
