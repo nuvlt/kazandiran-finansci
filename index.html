@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Demo</title>
+    <title>Kazandıran Finansçı - RTP %70</title>
     <style>
         /* CSS Kodu (Önceki Sürümle Aynı) */
         body {
@@ -306,7 +306,7 @@
 </div>
 
 <script>
-    // JavaScript Başlangıcı - Keskin Kırılımlı Grafik
+    // JavaScript Başlangıcı - RTP %70 Model
 
     const bakiyeGosterge = document.getElementById('bakiyeGosterge');
     const aktifBahisGosterge = document.getElementById('aktifBahisGosterge');
@@ -328,6 +328,9 @@
     const CANVAS_HEIGHT = 350;
     const CANVAS_WIDTH = 760;
     const MAX_GOSTERIM = 10.0;
+    const TARGET_RTP = 0.70; // %70 RTP
+    // Crash olasılığı formülü için katsayı (RTP'ye göre ayarlandı)
+    const CRASH_FACTOR = 1 / TARGET_RTP; 
 
     // --- UI ve Bahis Yönetimi ---
     function updateUI() {
@@ -355,26 +358,23 @@
         if (grafikNoktalari.length < 2) return;
 
         ctx.beginPath();
-        ctx.strokeStyle = carpanGosterge.style.color; // Çizgi rengini anlık çarpan rengiyle senkronize et
+        ctx.strokeStyle = carpanGosterge.style.color; 
         ctx.lineWidth = 3;
 
         const noktaSayisi = grafikNoktalari.length;
         const cizilecekNoktalar = grafikNoktalari.slice(Math.max(0, noktaSayisi - grafikKapasitesi));
         const xStep = CANVAS_WIDTH / (grafikKapasitesi - 1 || 1); 
 
-        // Oranlama, 0.00x'i neredeyse en alta (y=0.98) yerleştirir
-        const y_min = CANVAS_HEIGHT * 0.02; // En üst Y pozisyonu (MAX_GOSTERIM)
-        const y_max = CANVAS_HEIGHT * 0.98; // En alt Y pozisyonu (0.00x)
+        const y_min = CANVAS_HEIGHT * 0.02; 
+        const y_max = CANVAS_HEIGHT * 0.98; 
 
         cizilecekNoktalar.forEach((carpan, index) => {
             const x = index * xStep;
             
             const normalizedCarpan = Math.max(0.00, Math.min(MAX_GOSTERIM, carpan));
             
-            // Oran: (çarpan) / (maxGosterim) -> 0'dan 1'e gider
             const oran = normalizedCarpan / MAX_GOSTERIM;
             
-            // Y pozisyonu: Oran arttıkça Y azalır (yukarı hareket eder)
             const y = y_max - (y_max - y_min) * oran;
 
             if (index === 0) {
@@ -389,16 +389,14 @@
 
     // --- Oyun Mantığı ---
 
-    // Momentum yerine daha keskin hareketler için rastgele büyük/küçük adımlar kullanılıyor
-    let trend = 0.01; // Genel eğilim: hafifçe yukarı
+    // Keskin kırılımlar için yeni model
     function calculateNextCarpan() {
-        // Çarpan değişimini rastgele belirle (daha keskin kırılımlar için)
-        let volatility = Math.random() * 0.04; // 0.00 ile 0.04 arası değişim
-        let direction = (Math.random() > 0.45) ? 1 : -1; // %55 Yükseliş, %45 Düşüş ihtimali
+        let volatility = Math.random() * 0.04; 
+        let direction = (Math.random() > 0.45) ? 1 : -1; 
         
         let degisim = volatility * direction;
         
-        // Yüksek çarpanlarda düşüş ihtimalini artır
+        // Yüksek çarpanlarda düşüş eğilimi ekle (keskin ve tehlikeli)
         if (mevcutCarpan > 2.00) {
             degisim -= (mevcutCarpan - 2.00) * 0.01;
         }
@@ -407,6 +405,27 @@
         
         return parseFloat(nextCarpan.toFixed(2));
     }
+
+    // RTP'ye Dayalı Crash Olasılığı
+    function shouldCrash() {
+        // Crash olasılığı: P(crash) = 1 / (CRASH_FACTOR * x)
+        // x çarpanında crash olma olasılığı
+        // Bu formül, ortalama crash'in 1.43x olmasını sağlar.
+        
+        if (mevcutCarpan <= 1.00) {
+            // 1.00x ve altında crash olasılığı çok düşüktür (Örn: %0.1).
+            return Math.random() < 0.001; 
+        }
+
+        // x > 1.00 için gerçekçi crash olasılığı
+        // P(crash) = (CRASH_FACTOR / (mevcutCarpan * mevcutCarpan)) * adim_buyuklugu 
+        // Burada CRASH_FACTOR / x'i kullanacağız
+        let prob = (CRASH_FACTOR / mevcutCarpan) - TARGET_RTP; // RTP'den uzaklaşma miktarı
+        prob = Math.max(0.0001, prob * 0.005); // Olasılığı küçük bir değere ölçeklendir
+        
+        return Math.random() < prob;
+    }
+
 
     function turuBaslat() {
         if (bakiye < aktifBahis) {
@@ -420,7 +439,6 @@
         oyunBasladi = true;
         mevcutCarpan = 1.00;
         grafikNoktalari = [1.00];
-        trend = 0.01; // Trendi resetle
         oynaToplaBtn.textContent = 'TOPLA';
         oynaToplaBtn.classList.add('topla-modu');
         carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
@@ -439,12 +457,8 @@
 
             mevcutCarpan = calculateNextCarpan();
 
-            // Kritik Sıfırlanma (Crash) Kontrolü
-            // Çarpan yükseldikçe crash olasılığı artar
-            let crashOlasilik = (mevcutCarpan - 1.0) * 0.005; 
-            
-            // Crash
-            if (Math.random() < crashOlasilik || mevcutCarpan < 0.01) {
+            // RTP'ye Dayalı Crash Kontrolü
+            if (shouldCrash() || mevcutCarpan < 0.01) {
                 mevcutCarpan = 0.01;
                 grafikNoktalari.push(mevcutCarpan); 
                 turuBitir(false); // Kayıp
@@ -453,7 +467,6 @@
             
             // UI ve Renk Güncellemesi
             carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
-            // 1.00x ve üstü Yeşil, 1.00x altı Turuncu
             carpanGosterge.style.color = mevcutCarpan >= 1.00 ? '#00ff7f' : '#ffaa00'; 
             
             grafikNoktalari.push(mevcutCarpan);
@@ -470,7 +483,7 @@
         let sonucMetni;
         
         if (kazanildi) {
-            const kazanc = aktifBahis * mevcutCarpan * 0.68; 
+            const kazanc = aktifBahis * mevcutCarpan * 0.68; // %32 kesinti uygulandı
             bakiye += kazanc;
             sonucMetni = `${mevcutCarpan.toFixed(2)}x (KAZANÇ: ₺${kazanc.toFixed(2)})`;
             carpanGosterge.classList.remove('crash');
@@ -482,7 +495,7 @@
             carpanGosterge.classList.add('crash'); 
             carpanGosterge.style.color = '#ff4d4d'; 
             
-            // Crash anında grafiğin en altta sabit kalmasını sağlamak için son birkaç noktayı 0.01x yap
+            // Yatay seyir simülasyonu
             for(let i=0; i<5; i++) {
                 grafikNoktalari.push(0.01);
             }
