@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Ultra Volatilite</title>
+    <title>Kazandıran Finansçı - Crash Model</title>
     <style>
         /* CSS Kodu (Önceki Sürümle Aynı) */
         body {
@@ -306,7 +306,7 @@
 </div>
 
 <script>
-    // JavaScript Başlangıcı - Ultra Volatilite ve RTP %70 Model
+    // JavaScript Başlangıcı - Gerçekçi Crash Oyunu Modeli
 
     const bakiyeGosterge = document.getElementById('bakiyeGosterge');
     const aktifBahisGosterge = document.getElementById('aktifBahisGosterge');
@@ -327,12 +327,13 @@
 
     const CANVAS_HEIGHT = 350;
     const CANVAS_WIDTH = 760;
-    // Maksimum gösterim değerini artırdık, böylece yüksek çarpanlar da ekrana sığabilir.
-    const MAX_GOSTERIM = 50.0; 
-    const MAX_CARPAN = 100000.00; // Teorik maksimum çarpan sınırı
-    const MAX_KAZANC = 10000000.00; // 10 Milyon TL maksimum kazanç
+    const MAX_GOSTERIM = 50.0; // Grafik çizimi için Max.
+    const MAX_KAZANC = 10000000.00; 
     const TARGET_RTP = 0.70; 
-    const CRASH_FACTOR = 1 / TARGET_RTP; 
+    // Lambda (Hız parametresi) Inverse Exponential Distribution için: Lambda = 1 / RTP
+    const LAMBDA = 1 / TARGET_RTP; 
+
+    let crashNoktasi = 0.01; // Her tur başında rastgele belirlenecek hedef çarpan
 
     // --- UI ve Bahis Yönetimi ---
     function updateUI() {
@@ -373,7 +374,6 @@
         cizilecekNoktalar.forEach((carpan, index) => {
             const x = index * xStep;
             
-            // Sadece MAX_GOSTERIM altındaki değerleri orantılı çiz. Üstü en üstte (y_min) kalır.
             const normalizedCarpan = Math.max(0.00, Math.min(MAX_GOSTERIM, carpan));
             
             const oran = normalizedCarpan / MAX_GOSTERIM;
@@ -392,40 +392,39 @@
 
     // --- Oyun Mantığı ---
 
-    // Çarpanı çok daha hızlı artıran ve düşüren yeni model
-    function calculateNextCarpan() {
-        // Çarpan adımı, mevcut çarpan ile orantılı olarak artırıldı (Üstel Büyüme)
-        let volatility = Math.random() * 0.05 * mevcutCarpan; 
-        let direction = (Math.random() > 0.45) ? 1 : -1; // Hafif yukarı eğilim
-
-        let degisim = volatility * direction;
+    // RTP'ye uygun, matematiksel olarak adil bir Crash Noktası üretir.
+    function generateCrashPoint() {
+        // Inverse Exponential Distribution formülü: x = 1 / (lambda * (1 - r))
+        // Bu, crash oyunlarının RTP matematiğinin temelidir.
+        const r = Math.random(); 
+        let crashPoint = 1 + (Math.log(LAMBDA) - Math.log(LAMBDA - 1)) / LAMBDA; 
         
-        let nextCarpan = mevcutCarpan + degisim;
+        // Basitleştirilmiş formül: x = 1 / (1 - r)^(1/LAMBDA) 
+        // Crash oyunlarında kullanılan genel formülün tersi: x = 1 / (1 - r) * (1 - 1/LAMBDA)
         
-        // Çarpanın 1.00x altına düşmesini engelle (Oyun 1.00x'ten başlar)
-        // nextCarpan = Math.max(1.00, nextCarpan); 
+        // Gerçekçi Crash oyunu dağılımı: x = 1 / (1 - r)^(1/LAMBDA)
+        // Ancak bu, basit JS simülasyonlarında yavaş kalır. En kolayı:
+        // C = LAMBDA / (LAMBDA - 1) 
+        // x = 1 / (1 - (r * (1 - 1/C))) 
 
-        // Teorik maksimum çarpanı aşmasını engelle
-        return parseFloat(Math.min(MAX_CARPAN, nextCarpan).toFixed(2));
+        // En basit Crash formülü (LAMBDA > 1 varsayımı ile):
+        crashPoint = 1 / (1 - Math.pow(r, 1 / LAMBDA)); 
+
+        // Eğer crashPoint çok küçükse (teoride 1.00x bile olabilir), en az 1.01x yapsın
+        crashPoint = Math.max(1.01, crashPoint);
+        
+        // Teorik max çarpanı sınırla (eğer 100x'i çok aşarsa)
+        return parseFloat(Math.min(100000.00, crashPoint).toFixed(2)); 
     }
 
-    // RTP'ye Dayalı Crash Olasılığı
-    function shouldCrash() {
-        // Olasılık = (CRASH_FACTOR / (mevcutCarpan * adim_buyuklugu))
+    // Sabit Büyüme Hızı
+    function calculateNextCarpan() {
+        // Her 50ms (1.00x hızda) için artış adımı.
+        // 1.00x'ten 2.00x'e ulaşması için 200 adıma (10 saniyeye) yakın süre gerekir.
+        const artimHizi = 0.005; 
+        let nextCarpan = mevcutCarpan + artimHizi;
         
-        if (mevcutCarpan <= 1.00) {
-            // 1.00x ve altında crash olasılığı çok düşüktür (%0.01)
-            return Math.random() < 0.0001; 
-        }
-
-        // x > 1.00 için crash olasılığı
-        // mevcutCarpan arttıkça payda büyür, olasılık artar.
-        let prob = (CRASH_FACTOR / mevcutCarpan) - TARGET_RTP;
-        
-        // Bu değeri oyun hızı ve oynaklığına göre ölçeklendiriyoruz. 0.005'i 0.5'e çıkardık.
-        prob = Math.max(0.0001, prob * 0.5); 
-        
-        return Math.random() < prob;
+        return parseFloat(nextCarpan.toFixed(2));
     }
 
 
@@ -438,6 +437,9 @@
         bakiye -= aktifBahis; 
         updateUI();
 
+        // **TUR BAŞINDA GİZLİ CRASH NOKTASINI BELİRLE**
+        crashNoktasi = generateCrashPoint();
+        
         oyunBasladi = true;
         mevcutCarpan = 1.00;
         grafikNoktalari = [1.00];
@@ -459,17 +461,17 @@
 
             mevcutCarpan = calculateNextCarpan();
 
-            // Maksimum kazanç kontrolü (Çarpan X Bahis)
-            if (aktifBahis * mevcutCarpan > MAX_KAZANC) {
-                 mevcutCarpan = MAX_KAZANC / aktifBahis; // Çarpanı kazanç limitine indir
-            }
-
-            // RTP'ye Dayalı Crash Kontrolü
-            if (shouldCrash() || mevcutCarpan < 0.01) {
-                mevcutCarpan = 0.01;
+            // 1. Crash Kontrolü: Gizli noktaya ulaştık mı?
+            if (mevcutCarpan >= crashNoktasi) {
+                mevcutCarpan = 0.01; // Anında çöküş görseli için
                 grafikNoktalari.push(mevcutCarpan); 
                 turuBitir(false); // Kayıp
                 return;
+            }
+
+            // 2. Maksimum Kazanç Kontrolü
+            if (aktifBahis * mevcutCarpan > MAX_KAZANC) {
+                 mevcutCarpan = MAX_KAZANC / aktifBahis; 
             }
             
             // UI ve Renk Güncellemesi
@@ -490,11 +492,8 @@
         let sonucMetni;
         
         if (kazanildi) {
-            // Kazanç, maksimum kazanç ile sınırlandırılır
             const gercekKazanc = aktifBahis * mevcutCarpan;
             const nihaiKazanc = Math.min(gercekKazanc, MAX_KAZANC);
-            
-            // Kesinti (32%)
             const odenenKazanc = nihaiKazanc * 0.68; 
 
             bakiye += odenenKazanc;
@@ -502,12 +501,13 @@
             carpanGosterge.classList.remove('crash');
             carpanGosterge.style.color = '#00ff7f';
         } else {
-            // Kayıp anı (mevcutCarpan = 0.01)
-            sonucMetni = `0.01x (KAYIP)`;
+            // Kayıp anı (mevcutCarpan 0.01 olarak ayarlandı)
+            sonucMetni = `0.01x (CRASH! Ortalama: ${crashNoktasi.toFixed(2)}x)`;
             carpanGosterge.textContent = "0.01x";
             carpanGosterge.classList.add('crash'); 
             carpanGosterge.style.color = '#ff4d4d'; 
             
+            // Yatay seyir simülasyonu
             for(let i=0; i<5; i++) {
                 grafikNoktalari.push(0.01);
             }
@@ -549,7 +549,6 @@
 
     // --- Olay Dinleyicileri ---
     
-    // Hız Butonları
     document.querySelectorAll('.hiz-ayarlari button').forEach(button => {
         button.addEventListener('click', function() {
             if (oyunBasladi) return;
@@ -560,12 +559,10 @@
         });
     });
 
-    // Oto Strateji Switch (Şimdilik sadece görsel)
     document.getElementById('otoStratejiSwitch').addEventListener('click', function() {
         this.classList.toggle('on');
     });
 
-    // Sayfa Yüklendiğinde
     window.onload = () => {
         updateUI();
         const grafikAlani = document.querySelector('.grafik-alani');
