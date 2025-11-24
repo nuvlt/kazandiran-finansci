@@ -74,6 +74,11 @@
             text-shadow: 0 0 10px #00ff7f;
             z-index: 10;
         }
+        /* Crash anındaki çarpan göstergesi için stil */
+        .carpan-gosterge.crash {
+            color: #ff4d4d; /* Kırmızı */
+        }
+
         #grafikCanvas {
             position: absolute;
             top: 0;
@@ -302,7 +307,7 @@
 </div>
 
 <script>
-    // JavaScript Başlangıcı - YENİ VE GELİŞTİRİLMİŞ VERSİYON
+    // JavaScript Başlangıcı
 
     const bakiyeGosterge = document.getElementById('bakiyeGosterge');
     const aktifBahisGosterge = document.getElementById('aktifBahisGosterge');
@@ -339,7 +344,6 @@
 
     function ayarlaBahis(delta) {
         if (oyunBasladi) return;
-        // Bahis limitlerini kontrol et
         let yeniBahis = aktifBahis + delta;
         yeniBahis = Math.max(10.00, Math.min(100.00, yeniBahis));
         setBahis(yeniBahis);
@@ -356,22 +360,25 @@
         ctx.lineWidth = 3;
 
         const noktaSayisi = grafikNoktalari.length;
-        // Grafiği sağdan sola kaydırarak çizmek için sadece son 100 noktayı al
         const cizilecekNoktalar = grafikNoktalari.slice(Math.max(0, noktaSayisi - grafikKapasitesi));
         const xStep = CANVAS_WIDTH / (grafikKapasitesi - 1 || 1); 
 
+        // 1.00x'in Y ekseni başlangıç noktası
         const yBase = CANVAS_HEIGHT * 0.95; 
 
         cizilecekNoktalar.forEach((carpan, index) => {
             const x = index * xStep;
             
-            const normalizedCarpan = Math.max(1.0, Math.min(MAX_GOSTERIM, carpan));
+            // Çarpanı [0.00, MAX_GOSTERIM] aralığında normalize et. 0.00x en alt çizgi olacak.
+            const normalizedCarpan = Math.max(0.00, Math.min(MAX_GOSTERIM, carpan));
             
-            // Oran: (çarpan - 1) / (maxGosterim - 1)
-            const oran = (normalizedCarpan - 1) / (MAX_GOSTERIM - 1);
+            // Oran: (çarpan - 0) / (maxGosterim - 0). Oran 0'dan 1'e gider.
+            const oran = normalizedCarpan / MAX_GOSTERIM;
             
-            // Y pozisyonu: Çarpan arttıkça Y yukarı (küçük değerlere) doğru hareket eder.
-            const y = yBase - (yBase - (CANVAS_HEIGHT * 0.05)) * oran;
+            // Y pozisyonu: oran arttıkça Y yukarı (küçük değerlere) doğru hareket eder.
+            // 0.00x için y değeri CANVAS_HEIGHT * 0.98 gibi bir yere denk gelmeli (en alt çizgi)
+            // MAX_GOSTERIM için y değeri CANVAS_HEIGHT * 0.02 gibi bir yere denk gelmeli (en üst çizgi)
+            const y = (CANVAS_HEIGHT * 0.98) - ( (CANVAS_HEIGHT * 0.98) - (CANVAS_HEIGHT * 0.02) ) * oran;
 
             if (index === 0) {
                 ctx.moveTo(x, y);
@@ -385,11 +392,9 @@
 
     // --- Oyun Mantığı ---
 
-    let momentum = 0.00; // Grafiğin eğilimini korumasına yardımcı olur
+    let momentum = 0.00; 
     function calculateNextCarpan() {
-        // Momentumun rastgele değişimi (volatilite)
         momentum += (Math.random() - 0.5) * 0.008; 
-        // Momentum sınırları (hafif yükseliş eğilimi için üst limit daha yüksek)
         momentum = Math.max(-0.02, Math.min(0.04, momentum)); 
 
         let nextCarpan = mevcutCarpan + momentum;
@@ -404,17 +409,18 @@
             return;
         }
 
-        bakiye -= aktifBahis; // Bahisi düşür
+        bakiye -= aktifBahis; 
         updateUI();
 
         oyunBasladi = true;
-        mevcutCarpan = 1.00;
+        mevcutCarpan = 1.00; // Başlangıç çarpanı
         grafikNoktalari = [1.00];
-        momentum = 0.01; // Başlangıçta hafif yukarı eğilim
+        momentum = 0.01; 
         oynaToplaBtn.textContent = 'TOPLA';
         oynaToplaBtn.classList.add('topla-modu');
         carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
-        carpanGosterge.style.color = '#00ff7f';
+        carpanGosterge.classList.remove('crash'); // Kırmızı rengi kaldır
+        carpanGosterge.style.color = '#00ff7f'; // Yeşil yap
         
         turuCalistir();
     }
@@ -432,22 +438,19 @@
             mevcutCarpan = calculateNextCarpan();
 
             // Kritik Sıfırlanma (Crash) Kontrolü
-            // Çarpan yükseldikçe sıfırlanma olasılığı artar (Risk/Ödül)
             let crashOlasilik = (mevcutCarpan - 1.0) * 0.005; 
             
-            if (Math.random() < crashOlasilik) {
-                mevcutCarpan = 0.00;
+            if (Math.random() < crashOlasilik || mevcutCarpan < 0.00) { // mevcutCarpan 0'ın altına düşerse de crash
+                mevcutCarpan = 0.01; // Ekran görüntüsündeki gibi 0.01x'e düşürüyoruz
                 grafikNoktalari.push(mevcutCarpan); 
                 cizGrafik();
                 turuBitir(false); // Kayıp
                 return;
             }
-
-            // Çarpan 1.00x'in altına düşebilir, ancak 0.00x'e inmediği sürece oyun devam eder
             
             // UI güncellemesi
             carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
-            carpanGosterge.style.color = mevcutCarpan >= 1.00 ? '#00ff7f' : '#ffaa00'; // Turuncu: Düşüşte ama kayıp değil
+            carpanGosterge.style.color = mevcutCarpan >= 1.00 ? '#00ff7f' : '#ffaa00'; 
             
             grafikNoktalari.push(mevcutCarpan);
             cizGrafik();
@@ -460,16 +463,26 @@
         oynaToplaBtn.textContent = 'OYNA';
         oynaToplaBtn.classList.remove('topla-modu');
         
-        let sonucMetni = mevcutCarpan.toFixed(2);
+        let sonucMetni;
         
         if (kazanildi) {
-            const kazanc = aktifBahis * mevcutCarpan * 0.68; // %32 kesinti uygulandı
+            const kazanc = aktifBahis * mevcutCarpan * 0.68; 
             bakiye += kazanc;
             sonucMetni = `${mevcutCarpan.toFixed(2)}x (KAZANÇ: ₺${kazanc.toFixed(2)})`;
+            carpanGosterge.classList.remove('crash');
+            carpanGosterge.style.color = '#00ff7f';
         } else {
-            sonucMetni = "0.00x (KAYIP)";
-            carpanGosterge.textContent = "0.00x";
-            carpanGosterge.style.color = '#ff4d4d'; // Kırmızı
+            // Kayıp anında 0.01x çarpan göstergesini ve rengini ayarla
+            sonucMetni = `0.01x (KAYIP)`;
+            carpanGosterge.textContent = "0.01x";
+            carpanGosterge.classList.add('crash'); // Kırmızı sınıfı ekle
+            carpanGosterge.style.color = '#ff4d4d'; // Kırmızı yap
+            
+            // Görseldeki gibi yatay seyri simüle etmek için son birkaç noktayı 0.01x yap
+            for(let i=0; i<5; i++) { // Son 5 noktayı crash seviyesinde tut (isteğe bağlı, artırılabilir)
+                grafikNoktalari.push(0.01);
+            }
+            cizGrafik(); // Son durumu tekrar çiz
         }
         
         ekleSonuc(sonucMetni, kazanildi);
@@ -486,10 +499,8 @@
              yeniSonucDiv.style.backgroundColor = '#4b0082'; 
         }
 
-        // H3'ten sonra en üste ekle
         sonuclarAlani.insertBefore(yeniSonucDiv, sonuclarAlani.children[1]); 
         
-        // Sadece son 20 sonucu göster
         while (sonuclarAlani.children.length > 21) {
             sonuclarAlani.removeChild(sonuclarAlani.lastChild);
         }
@@ -497,14 +508,12 @@
 
     function oynaVeyaTopla() {
         if (oyunBasladi) {
-            // TOPLA işlemi
             if (mevcutCarpan > 1.00) {
                 turuBitir(true); 
             } else {
                 alert("Toplamak için çarpanın 1.00x'i geçmesi gerekir.");
             }
         } else {
-            // OYNA işlemi
             turuBaslat();
         }
     }
@@ -530,8 +539,6 @@
     // Sayfa Yüklendiğinde
     window.onload = () => {
         updateUI();
-        // Canvas boyutlarını ayarlama
-        // Bu kısım, console hatasını çözmek için önemlidir. DOM yüklendiğinde çalışır.
         const grafikAlani = document.querySelector('.grafik-alani');
         canvas.width = grafikAlani.clientWidth - 4; 
         canvas.height = grafikAlani.clientHeight - 4;
