@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kazandıran Finansçı</title>
+    <style>
+        /* Genel Stil Ayarları */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d1e3a; /* Koyu Mavi Arka Plan */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .oyun-container {
+            width: 800px;
+            max-width: 95%;
+            background-color: #0f274a; /* Daha koyu oyun çerçevesi */
+            border: 4px solid #1e90ff; /* Mavi çerçeve */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(30, 144, 255, 0.5);
+        }
+
+        /* Başlık ve Bakiye */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #1e90ff;
+        }
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff7f; /* Parlak Yeşil Başlık */
+            text-shadow: 0 0 5px #00ff7f;
+        }
+        .bakiye {
+            font-size: 24px;
+            color: #fff;
+            background-color: #0f274a;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #1e90ff;
+        }
+
+        /* Grafik Alanı */
+        .grafik-alani {
+            position: relative;
+            height: 350px;
+            background-color: #0a1728; /* En koyu grafik zemini */
+            border: 2px solid #00ff7f;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            /* Basit ızgara görseli */
+            background-image: linear-gradient(to right, #1a3d6d 1px, transparent 1px),
+                              linear-gradient(to bottom, #1a3d6d 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .carpan-gosterge {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff7f;
+            text-shadow: 0 0 10px #00ff7f;
+            z-index: 10;
+        }
+        /* Buraya dinamik olarak çizilecek grafik hattı (JS ile) */
+        .grafik-hatti {
+            /* Sadece görsel bir temsil */
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 90%;
+            height: 50px; /* Görünür olması için */
+            background: linear-gradient(to right, #00ff7f 0%, #1e90ff 100%);
+            opacity: 0.5;
+        }
+
+
+        /* Alt Kontrol Paneli */
+        .kontrol-paneli {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Hız Ayarları */
+        .hiz-ayarlari {
+            grid-column: 1 / span 3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .hiz-ayarlari button {
+            background-color: #1e3d6d;
+            color: #fff;
+            padding: 8px 15px;
+            border: 1px solid #1e90ff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .hiz-ayarlari button:hover {
+            background-color: #1a5c96;
+        }
+        .hiz-ayarlari .aktif {
+            background-color: #1e90ff;
+            border-color: #fff;
+            font-weight: bold;
+        }
+
+        /* Sonuçlar Alanı */
+        .sonuclar-alani {
+            background-color: #0a1728;
+            border: 2px solid #1e90ff;
+            border-radius: 5px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+        }
+        .sonuclar-alani h3 {
+            margin-top: 0;
+            color: #00ff7f;
+            border-bottom: 1px solid #1e90ff;
+            padding-bottom: 5px;
+        }
+        .sonuclar-alani .sonuc-item {
+            background-color: #4b0082; /* Mor renk */
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 3px;
+            font-size: 14px;
+        }
+
+        /* Bahis/Oyun Tutarı ve Oyna Butonu */
+        .bahis-kontrol, .oyun-butonlari {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bahis-butonlari {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+        .bahis-butonlari button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .bahis-secim {
+            display: flex;
+            gap: 5px;
+        }
+        .bahis-secim button {
+            flex-grow: 1;
+            padding: 10px 0;
+            font-size: 16px;
+            background-color: #1e3d6d;
+            border: 1px solid #1e90ff;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .oyna-butonu {
+            background-color: #00cc66; /* Parlak Yeşil */
+            color: white;
+            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px #00994d;
+        }
+        .oyna-butonu:active {
+            box-shadow: 0 2px #00994d;
+            transform: translateY(3px);
+        }
+
+        .oto-strateji {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .oto-strateji-switch {
+            width: 60px;
+            height: 30px;
+            background-color: #333;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.4s;
+        }
+        .oto-strateji-switch.on {
+            background-color: #1e90ff;
+        }
+        .oto-strateji-switch .slider {
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.4s;
+        }
+        .oto-strateji-switch.on .slider {
+            transform: translateX(30px);
+        }
+        .not {
+            grid-column: 1 / span 3;
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="oyun-container">
+
+    <div class="header">
+        <div class="title">🚀 KAZANDIRAN FİNANSÇI</div>
+        <div class="bakiye">₺2.116,46</div>
+    </div>
+
+    <div class="grafik-alani">
+        <div class="carpan-gosterge">1.22x</div>
+        <div class="grafik-hatti"></div>
+    </div>
+
+    <div class="hiz-ayarlari">
+        <span style="font-weight: bold;">HIZ:</span>
+        <button>0.25x</button>
+        <button>0.50x</button>
+        <button class="aktif">1.00x</button>
+        <button>1.50x</button>
+        <button>2.00x</button>
+    </div>
+
+    <div class="kontrol-paneli">
+        <div class="sonuclar-alani">
+            <h3>SON EN İYİ SONUÇLAR</h3>
+            <div class="sonuc-item">1.64</div>
+            <div class="sonuc-item">2.10</div>
+            <div class="sonuc-item">0.85</div>
+        </div>
+
+        <div class="bahis-kontrol">
+            <div class="bahis-secim">
+                <button>-</button>
+                <button style="flex-grow: 2;">₺10,00</button> <button>+</button>
+            </div>
+
+            <div class="bahis-butonlari">
+                <button>₺10,00</button>
+                <button>₺20,00</button>
+                <button>₺30,00</button>
+                <button>₺50,00</button>
+            </div>
+
+            <button style="background-color: #1e3d6d; padding: 10px;">OTO STRATEJİ YAP</button>
+        </div>
+
+        <div class="oyun-butonlari">
+            <button class="oyna-butonu">OYNA / TOPLA</button>
+
+            <div class="oto-strateji">
+                <div class="oto-strateji-switch on"> <div class="slider"></div>
+                </div>
+                <span>OTO STRATEJİ</span>
+            </div>
+        </div>
+
+        <div class="not">
+            Tur başladıktan sonra dahil olunan oyunlar, kazançlarda %32 kesintiye tabidir.
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
