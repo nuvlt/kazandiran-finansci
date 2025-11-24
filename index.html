@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Crash Model</title>
+    <title>Kazandıran Finansçı - Pro Crash</title>
     <style>
-        /* CSS Kodu (Önceki Sürümle Aynı) */
+        /* CSS Kodu - Değişmedi */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0d1e3a; 
             display: flex;
             justify-content: center;
@@ -26,7 +26,6 @@
             box-shadow: 0 0 30px rgba(30, 144, 255, 0.5);
         }
 
-        /* Başlık ve Bakiye */
         .header {
             display: flex;
             justify-content: space-between;
@@ -50,7 +49,6 @@
             border: 1px solid #1e90ff;
         }
 
-        /* Grafik Alanı */
         .grafik-alani {
             position: relative;
             height: 350px;
@@ -58,24 +56,28 @@
             border: 2px solid #00ff7f;
             border-radius: 8px;
             margin-bottom: 20px;
-            background-image: linear-gradient(to right, #1a3d6d 1px, transparent 1px),
-                              linear-gradient(to bottom, #1a3d6d 1px, transparent 1px);
+            /* Grid Deseni */
+            background-image: 
+                linear-gradient(rgba(26, 61, 109, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 61, 109, 0.5) 1px, transparent 1px);
             background-size: 50px 50px;
             overflow: hidden;
         }
         .carpan-gosterge {
             position: absolute;
-            top: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            font-size: 48px;
-            font-weight: bold;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            font-weight: 800;
             color: #00ff7f;
-            text-shadow: 0 0 10px #00ff7f;
+            text-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
             z-index: 10;
+            font-variant-numeric: tabular-nums; /* Sayıların titremesini engeller */
         }
         .carpan-gosterge.crash {
-            color: #ff4d4d; /* Kırmızı */
+            color: #ff4d4d; 
+            text-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
         }
 
         #grafikCanvas {
@@ -84,14 +86,12 @@
             left: 0;
         }
 
-        /* Alt Kontrol Paneli */
         .kontrol-paneli {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
         }
 
-        /* Hız Ayarları */
         .hiz-ayarlari {
             grid-column: 1 / span 3;
             display: flex;
@@ -108,16 +108,9 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .hiz-ayarlari button:hover {
-            background-color: #1a5c96;
-        }
-        .hiz-ayarlari .aktif {
-            background-color: #1e90ff;
-            border-color: #fff;
-            font-weight: bold;
-        }
+        .hiz-ayarlari button:hover { background-color: #1a5c96; }
+        .hiz-ayarlari .aktif { background-color: #1e90ff; border-color: #fff; font-weight: bold; }
 
-        /* Sonuçlar Alanı */
         .sonuclar-alani {
             background-color: #0a1728;
             border: 2px solid #1e90ff;
@@ -125,23 +118,32 @@
             padding: 10px;
             height: 150px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column; 
         }
         .sonuclar-alani h3 {
             margin-top: 0;
             color: #00ff7f;
             border-bottom: 1px solid #1e90ff;
             padding-bottom: 5px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .sonuclar-liste {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
         }
         .sonuc-item {
-            background-color: #4b0082; /* Mor renk */
-            padding: 3px 8px;
-            border-radius: 3px;
-            display: inline-block;
-            margin: 3px;
-            font-size: 14px;
+            background-color: #4b0082;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
         }
+        .sonuc-item.kayip { background-color: #3d0d0d; color: #ff6666; border: 1px solid #ff4d4d; }
+        .sonuc-item.kazanc { background-color: #0d3d1e; color: #66ff99; border: 1px solid #00ff7f; }
 
-        /* Bahis/Oyun Tutarı ve Oyna Butonu */
         .bahis-kontrol, .oyun-butonlari {
             display: flex;
             flex-direction: column;
@@ -161,10 +163,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .bahis-secim {
-            display: flex;
-            gap: 5px;
-        }
+        .bahis-secim { display: flex; gap: 5px; }
         .bahis-secim button {
             flex-grow: 1;
             padding: 10px 0;
@@ -186,20 +185,11 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 5px #00994d;
-            transition: all 0.1s ease;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-        #oynaToplaBtn:active {
-            box-shadow: 0 2px #00994d;
-            transform: translateY(3px);
-        }
-        /* Topla modundayken rengi değiştir */
-        #oynaToplaBtn.topla-modu {
-            background-color: #ffaa00; /* Turuncu */
-            box-shadow: 0 5px #cc8800;
-        }
-        #oynaToplaBtn.topla-modu:active {
-            box-shadow: 0 2px #cc8800;
-        }
+        #oynaToplaBtn:active { box-shadow: 0 2px #00994d; transform: translateY(3px); }
+        #oynaToplaBtn.topla-modu { background-color: #ffaa00; box-shadow: 0 5px #cc8800; }
+        #oynaToplaBtn.topla-modu:active { box-shadow: 0 2px #cc8800; }
 
         .oto-strateji {
             display: flex;
@@ -216,9 +206,7 @@
             cursor: pointer;
             transition: background-color 0.4s;
         }
-        #otoStratejiSwitch.on {
-            background-color: #1e90ff;
-        }
+        #otoStratejiSwitch.on { background-color: #1e90ff; }
         #otoStratejiSwitch .slider {
             width: 26px;
             height: 26px;
@@ -229,17 +217,14 @@
             left: 2px;
             transition: transform 0.4s;
         }
-        #otoStratejiSwitch.on .slider {
-            transform: translateX(30px);
-        }
+        #otoStratejiSwitch.on .slider { transform: translateX(30px); }
         .not {
             grid-column: 1 / span 3;
-            font-size: 12px;
-            color: #aaa;
+            font-size: 11px;
+            color: #8899aa;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
-        /* CSS Bitişi */
     </style>
 </head>
 <body>
@@ -253,21 +238,22 @@
 
     <div class="grafik-alani">
         <div class="carpan-gosterge" id="carpanGosterge">1.00x</div>
-        <canvas id="grafikCanvas" width="760" height="350"></canvas>
+        <canvas id="grafikCanvas"></canvas>
     </div>
 
     <div class="hiz-ayarlari">
         <span style="font-weight: bold;">HIZ:</span>
-        <button data-speed="200">0.25x</button>
-        <button data-speed="100">0.50x</button>
-        <button class="aktif" data-speed="50">1.00x</button>
-        <button data-speed="33">1.50x</button>
-        <button data-speed="25">2.00x</button>
+        <button onclick="setHiz(0.5)">0.50x</button>
+        <button class="aktif" onclick="setHiz(1.0)">1.00x</button>
+        <button onclick="setHiz(2.0)">2.00x</button>
+        <button onclick="setHiz(5.0)">5.00x</button>
     </div>
 
     <div class="kontrol-paneli">
-        <div class="sonuclar-alani" id="sonuclarAlani">
-            <h3>SON EN İYİ SONUÇLAR</h3>
+        <div class="sonuclar-alani">
+            <h3>SONUÇLAR</h3>
+            <div class="sonuclar-liste" id="sonuclarListesi">
+                </div>
         </div>
 
         <div class="bahis-kontrol">
@@ -278,300 +264,308 @@
             </div>
 
             <div class="bahis-butonlari">
-                <button onclick="setBahis(10)">₺10,00</button>
-                <button onclick="setBahis(20)">₺20,00</button>
-                <button onclick="setBahis(30)">₺30,00</button>
-                <button onclick="setBahis(50)">₺50,00</button>
+                <button onclick="setBahis(10)">₺10</button>
+                <button onclick="setBahis(20)">₺20</button>
+                <button onclick="setBahis(50)">₺50</button>
+                <button onclick="setBahis(100)">₺100</button>
             </div>
-
-            <button style="background-color: #1e3d6d; padding: 10px;">OTO STRATEJİ YAP</button>
         </div>
 
         <div class="oyun-butonlari">
             <button id="oynaToplaBtn" onclick="oynaVeyaTopla()">OYNA</button>
-
             <div class="oto-strateji">
-                <div id="otoStratejiSwitch" class="on">
-                    <div class="slider"></div>
-                </div>
-                <span>OTO STRATEJİ</span>
+                <div id="otoStratejiSwitch"><div class="slider"></div></div>
+                <span style="font-size: 12px;">OTO STRATEJİ</span>
             </div>
         </div>
 
         <div class="not">
-            Tur başladıktan sonra dahil olunan oyunlar, kazançlarda %32 kesintiye tabidir.
+            Tur başladıktan sonra dahil olunan oyunlar, kazançlarda %32 kesintiye tabidir. Max Kazanç: ₺10.000.000
         </div>
     </div>
-
 </div>
 
 <script>
-    // JavaScript Başlangıcı - Gerçekçi Crash Oyunu Modeli
+    // --- OYUN AYARLARI ---
+    const TARGET_RTP = 0.70; // %70 RTP
+    const HOUSE_EDGE = 1 - TARGET_RTP; // %30 Kasa Avantajı
+    const MAX_KAZANC = 10000000.00;
+    
+    // Değişkenler
+    let bakiye = 100.00;
+    let aktifBahis = 10.00;
+    let oyunDurumu = 'bekliyor'; // 'bekliyor', 'oynuyor', 'bitti'
+    let mevcutCarpan = 1.00;
+    let hedeflenenCrashNoktasi = 0;
+    let baslangicZamani = 0;
+    let oyunHiziCarpani = 1.0; 
+    let animasyonFrameId;
+    let grafikVerisi = [];
 
-    const bakiyeGosterge = document.getElementById('bakiyeGosterge');
-    const aktifBahisGosterge = document.getElementById('aktifBahisGosterge');
-    const oynaToplaBtn = document.getElementById('oynaToplaBtn');
-    const carpanGosterge = document.getElementById('carpanGosterge');
-    const sonuclarAlani = document.getElementById('sonuclarAlani');
+    // DOM Elementleri
+    const uiBakiye = document.getElementById('bakiyeGosterge');
+    const uiBahis = document.getElementById('aktifBahisGosterge');
+    const uiCarpan = document.getElementById('carpanGosterge');
+    const uiBtn = document.getElementById('oynaToplaBtn');
+    const uiListe = document.getElementById('sonuclarListesi');
     const canvas = document.getElementById('grafikCanvas');
     const ctx = canvas.getContext('2d');
 
-    let bakiye = 100.00;
-    let aktifBahis = 10.00;
-    let oyunBasladi = false;
-    let mevcutCarpan = 1.00;
-    let oyunHiziMs = 50; 
-    let oyunInterval;
-    let grafikNoktalari = []; 
-    let grafikKapasitesi = 100;
+    // Canvas Boyutlandırma
+    function resizeCanvas() {
+        const parent = canvas.parentElement;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    const CANVAS_HEIGHT = 350;
-    const CANVAS_WIDTH = 760;
-    const MAX_GOSTERIM = 50.0; // Grafik çizimi için Max.
-    const MAX_KAZANC = 10000000.00; 
-    const TARGET_RTP = 0.70; 
-    // Lambda (Hız parametresi) Inverse Exponential Distribution için: Lambda = 1 / RTP
-    const LAMBDA = 1 / TARGET_RTP; 
+    // --- TEMEL FONKSİYONLAR ---
 
-    let crashNoktasi = 0.01; // Her tur başında rastgele belirlenecek hedef çarpan
-
-    // --- UI ve Bahis Yönetimi ---
     function updateUI() {
-        bakiyeGosterge.textContent = `₺${bakiye.toFixed(2)}`;
-        aktifBahisGosterge.textContent = `₺${aktifBahis.toFixed(2)}`;
+        uiBakiye.textContent = `₺${bakiye.toFixed(2)}`;
+        uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
 
-    function setBahis(tutar) {
-        if (oyunBasladi) return;
-        aktifBahis = Math.max(10.00, Math.min(100.00, tutar));
+    function setBahis(miktar) {
+        if (oyunDurumu === 'oynuyor') return;
+        aktifBahis = Math.min(100, Math.max(10, miktar));
         updateUI();
     }
 
     function ayarlaBahis(delta) {
-        if (oyunBasladi) return;
-        let yeniBahis = aktifBahis + delta;
-        yeniBahis = Math.max(10.00, Math.min(100.00, yeniBahis));
-        setBahis(yeniBahis);
-    }
-    
-    // --- Grafik Çizimi Fonksiyonu ---
-    function cizGrafik() {
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        if (grafikNoktalari.length < 2) return;
-
-        ctx.beginPath();
-        ctx.strokeStyle = carpanGosterge.style.color; 
-        ctx.lineWidth = 3;
-
-        const noktaSayisi = grafikNoktalari.length;
-        const cizilecekNoktalar = grafikNoktalari.slice(Math.max(0, noktaSayisi - grafikKapasitesi));
-        const xStep = CANVAS_WIDTH / (grafikKapasitesi - 1 || 1); 
-
-        const y_min = CANVAS_HEIGHT * 0.02; 
-        const y_max = CANVAS_HEIGHT * 0.98; 
-
-        cizilecekNoktalar.forEach((carpan, index) => {
-            const x = index * xStep;
-            
-            const normalizedCarpan = Math.max(0.00, Math.min(MAX_GOSTERIM, carpan));
-            
-            const oran = normalizedCarpan / MAX_GOSTERIM;
-            
-            const y = y_max - (y_max - y_min) * oran;
-
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-
-        ctx.stroke();
+        setBahis(aktifBahis + delta);
     }
 
-    // --- Oyun Mantığı ---
-
-    // RTP'ye uygun, matematiksel olarak adil bir Crash Noktası üretir.
-    function generateCrashPoint() {
-        // Inverse Exponential Distribution formülü: x = 1 / (lambda * (1 - r))
-        // Bu, crash oyunlarının RTP matematiğinin temelidir.
-        const r = Math.random(); 
-        let crashPoint = 1 + (Math.log(LAMBDA) - Math.log(LAMBDA - 1)) / LAMBDA; 
-        
-        // Basitleştirilmiş formül: x = 1 / (1 - r)^(1/LAMBDA) 
-        // Crash oyunlarında kullanılan genel formülün tersi: x = 1 / (1 - r) * (1 - 1/LAMBDA)
-        
-        // Gerçekçi Crash oyunu dağılımı: x = 1 / (1 - r)^(1/LAMBDA)
-        // Ancak bu, basit JS simülasyonlarında yavaş kalır. En kolayı:
-        // C = LAMBDA / (LAMBDA - 1) 
-        // x = 1 / (1 - (r * (1 - 1/C))) 
-
-        // En basit Crash formülü (LAMBDA > 1 varsayımı ile):
-        crashPoint = 1 / (1 - Math.pow(r, 1 / LAMBDA)); 
-
-        // Eğer crashPoint çok küçükse (teoride 1.00x bile olabilir), en az 1.01x yapsın
-        crashPoint = Math.max(1.01, crashPoint);
-        
-        // Teorik max çarpanı sınırla (eğer 100x'i çok aşarsa)
-        return parseFloat(Math.min(100000.00, crashPoint).toFixed(2)); 
+    function setHiz(x) {
+        if(oyunDurumu === 'oynuyor') return;
+        oyunHiziCarpani = x;
+        // Buton stillerini güncelle
+        document.querySelectorAll('.hiz-ayarlari button').forEach(b => b.classList.remove('aktif'));
+        event.target.classList.add('aktif');
     }
 
-    // Sabit Büyüme Hızı
-    function calculateNextCarpan() {
-        // Her 50ms (1.00x hızda) için artış adımı.
-        // 1.00x'ten 2.00x'e ulaşması için 200 adıma (10 saniyeye) yakın süre gerekir.
-        const artimHizi = 0.005; 
-        let nextCarpan = mevcutCarpan + artimHizi;
+    // --- KRİTİK OYUN MATEMATİĞİ ---
+
+    // Bu formül "Bustabit" tarzı oyunların standart formülüdür.
+    // %70 RTP için ayarlanmıştır.
+    function crashNoktasiUret() {
+        // 0 ile 1 arasında rastgele sayı
+        const r = Math.random();
         
-        return parseFloat(nextCarpan.toFixed(2));
+        // Formül: Kasa Avantajı / (1 - r)
+        // Örnek: r=0.99 gelirse -> 0.30 / 0.01 = 30x
+        // Örnek: r=0.01 gelirse -> 0.30 / 0.99 = 0.30x (Ama oyun min 1.00x olduğu için crash olur)
+        
+        let crash = TARGET_RTP / (1 - r);
+        
+        // Crash noktası 1.00'dan küçükse anında patlar (Instant Bust)
+        // Ama görsel olarak 1.00x'i göstermek için bunu hesaplıyoruz.
+        if (crash < 1.00) crash = 1.00;
+
+        return Math.floor(crash * 100) / 100; // 2 basamak yuvarla
     }
 
+    // Çarpanı hesaplayan fonksiyon (Üstel Büyüme - Exponential Growth)
+    // t: geçen saniye
+    function carpanHesapla(saniye) {
+        // Büyüme formülü: e^(k * t)
+        // k=0.06 yaklaşık 10 saniyede 2x'e, 20 saniyede 4x'e çıkarır.
+        const k = 0.06 * oyunHiziCarpani; 
+        return Math.pow(Math.E, k * saniye);
+    }
 
-    function turuBaslat() {
+    // --- OYUN DÖNGÜSÜ ---
+
+    function oyunuBaslat() {
         if (bakiye < aktifBahis) {
-            alert("Yetersiz bakiye!");
+            alert("Yetersiz Bakiye!");
             return;
         }
 
-        bakiye -= aktifBahis; 
+        // Reset
+        oyunDurumu = 'oynuyor';
+        bakiye -= aktifBahis;
         updateUI();
-
-        // **TUR BAŞINDA GİZLİ CRASH NOKTASINI BELİRLE**
-        crashNoktasi = generateCrashPoint();
         
-        oyunBasladi = true;
         mevcutCarpan = 1.00;
-        grafikNoktalari = [1.00];
-        oynaToplaBtn.textContent = 'TOPLA';
-        oynaToplaBtn.classList.add('topla-modu');
-        carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
-        carpanGosterge.classList.remove('crash'); 
-        carpanGosterge.style.color = '#00ff7f'; 
+        grafikVerisi = [];
         
-        turuCalistir();
+        // Crash Noktasını Belirle (Önceden belirlenir ama kullanıcı bilmez)
+        hedeflenenCrashNoktasi = crashNoktasiUret();
+        
+        // Konsola hile testi için yazalım (Geliştirici görsün)
+        console.log("Hedef Crash:", hedeflenenCrashNoktasi);
+
+        // UI Hazırlığı
+        uiBtn.textContent = "TOPLA";
+        uiBtn.classList.add('topla-modu');
+        uiCarpan.textContent = "1.00x";
+        uiCarpan.classList.remove('crash');
+        uiCarpan.style.color = "#00ff7f";
+        
+        baslangicZamani = Date.now();
+        animasyonFrameId = requestAnimationFrame(oyunDongusu);
     }
 
-    function turuCalistir() {
-        oyunInterval = setInterval(() => {
-            if (!oyunBasladi) {
-                clearInterval(oyunInterval);
-                return;
-            }
+    function oyunDongusu() {
+        if (oyunDurumu !== 'oynuyor') return;
 
-            mevcutCarpan = calculateNextCarpan();
+        // Geçen süreyi hesapla (Milisaniye -> Saniye)
+        const simdi = Date.now();
+        const gecenSaniye = (simdi - baslangicZamani) / 1000;
 
-            // 1. Crash Kontrolü: Gizli noktaya ulaştık mı?
-            if (mevcutCarpan >= crashNoktasi) {
-                mevcutCarpan = 0.01; // Anında çöküş görseli için
-                grafikNoktalari.push(mevcutCarpan); 
-                turuBitir(false); // Kayıp
-                return;
-            }
+        // Yeni çarpanı hesapla
+        mevcutCarpan = carpanHesapla(gecenSaniye);
 
-            // 2. Maksimum Kazanç Kontrolü
-            if (aktifBahis * mevcutCarpan > MAX_KAZANC) {
-                 mevcutCarpan = MAX_KAZANC / aktifBahis; 
-            }
-            
-            // UI ve Renk Güncellemesi
-            carpanGosterge.textContent = mevcutCarpan.toFixed(2) + 'x';
-            carpanGosterge.style.color = mevcutCarpan >= 1.00 ? '#00ff7f' : '#ffaa00'; 
-            
-            grafikNoktalari.push(mevcutCarpan);
-            cizGrafik();
-        }, oyunHiziMs);
+        // 1. Crash Kontrolü
+        if (mevcutCarpan >= hedeflenenCrashNoktasi) {
+            oyunuBitir(false); // Kaybettin (Patladı)
+            return;
+        }
+
+        // 2. Max Kazanç Kontrolü (Zorunlu Toplama)
+        if ((mevcutCarpan * aktifBahis) >= MAX_KAZANC) {
+            oyunuBitir(true); // Otomatik kazandı
+            return;
+        }
+
+        // Grafik Verisi Ekle
+        grafikVerisi.push(mevcutCarpan);
+        if(grafikVerisi.length > 300) grafikVerisi.shift(); // Hafıza yönetimi
+
+        // Ekranı Güncelle
+        uiCarpan.textContent = mevcutCarpan.toFixed(2) + "x";
+        grafigiCiz();
+
+        // Döngüye devam et
+        animasyonFrameId = requestAnimationFrame(oyunDongusu);
     }
 
-    function turuBitir(kazanildi) {
-        clearInterval(oyunInterval);
-        oyunBasladi = false;
-        oynaToplaBtn.textContent = 'OYNA';
-        oynaToplaBtn.classList.remove('topla-modu');
+    function oyunuBitir(kazandi) {
+        oyunDurumu = 'bitti';
+        cancelAnimationFrame(animasyonFrameId);
         
-        let sonucMetni;
-        
-        if (kazanildi) {
-            const gercekKazanc = aktifBahis * mevcutCarpan;
-            const nihaiKazanc = Math.min(gercekKazanc, MAX_KAZANC);
-            const odenenKazanc = nihaiKazanc * 0.68; 
+        uiBtn.textContent = "OYNA";
+        uiBtn.classList.remove('topla-modu');
 
-            bakiye += odenenKazanc;
-            sonucMetni = `${mevcutCarpan.toFixed(2)}x (KAZANÇ: ₺${odenenKazanc.toFixed(2)})`;
-            carpanGosterge.classList.remove('crash');
-            carpanGosterge.style.color = '#00ff7f';
+        let sonucDegeri = kazandi ? mevcutCarpan : hedeflenenCrashNoktasi;
+        
+        if (kazandi) {
+            // Kazanç Hesapla
+            let brutKazanc = aktifBahis * mevcutCarpan;
+            let netKazanc = brutKazanc * 0.68; // %32 Kesinti
+            bakiye += netKazanc;
+            
+            uiCarpan.style.color = "#00ff7f"; // Yeşil
+            sonucEkle(mevcutCarpan, true);
         } else {
-            // Kayıp anı (mevcutCarpan 0.01 olarak ayarlandı)
-            sonucMetni = `0.01x (CRASH! Ortalama: ${crashNoktasi.toFixed(2)}x)`;
-            carpanGosterge.textContent = "0.01x";
-            carpanGosterge.classList.add('crash'); 
-            carpanGosterge.style.color = '#ff4d4d'; 
+            // Kayıp (Crash)
+            uiCarpan.textContent = hedeflenenCrashNoktasi.toFixed(2) + "x";
+            uiCarpan.classList.add('crash'); // Kırmızı & Efekt
+            uiCarpan.style.color = "#ff4d4d";
             
-            // Yatay seyir simülasyonu
-            for(let i=0; i<5; i++) {
-                grafikNoktalari.push(0.01);
-            }
-            cizGrafik(); 
+            // Grafik sonunu çiz
+            grafikVerisi.push(0); // Düşüş efekti için
+            grafigiCiz();
+            
+            sonucEkle(hedeflenenCrashNoktasi, false);
         }
         
-        ekleSonuc(sonucMetni, kazanildi);
         updateUI();
-    }
-
-    function ekleSonuc(sonuc, kazanildi) {
-        const yeniSonucDiv = document.createElement('div');
-        yeniSonucDiv.classList.add('sonuc-item');
-        yeniSonucDiv.textContent = sonuc;
-        if (!kazanildi) {
-             yeniSonucDiv.style.backgroundColor = '#660000'; 
-        } else {
-             yeniSonucDiv.style.backgroundColor = '#4b0082'; 
-        }
-
-        sonuclarAlani.insertBefore(yeniSonucDiv, sonuclarAlani.children[1]); 
-        
-        while (sonuclarAlani.children.length > 21) {
-            sonuclarAlani.removeChild(sonuclarAlani.lastChild);
-        }
     }
 
     function oynaVeyaTopla() {
-        if (oyunBasladi) {
+        if (oyunDurumu === 'bekliyor' || oyunDurumu === 'bitti') {
+            oyunuBaslat();
+        } else if (oyunDurumu === 'oynuyor') {
+            // Topla butonuna basıldı
             if (mevcutCarpan > 1.00) {
-                turuBitir(true); 
-            } else {
-                alert("Toplamak için çarpanın 1.00x'i geçmesi gerekir.");
+                oyunuBitir(true);
             }
-        } else {
-            turuBaslat();
         }
     }
 
-    // --- Olay Dinleyicileri ---
-    
-    document.querySelectorAll('.hiz-ayarlari button').forEach(button => {
-        button.addEventListener('click', function() {
-            if (oyunBasladi) return;
+    // --- GRAFİK ÇİZİMİ (EĞRİSEL) ---
+    function grafigiCiz() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (grafikVerisi.length < 2) return;
+
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // Çizgi Rengi (Duruma göre)
+        if (oyunDurumu === 'bitti' && uiCarpan.classList.contains('crash')) {
+            ctx.strokeStyle = "#ff4d4d"; // Kırmızı
+        } else {
+            ctx.strokeStyle = "#00ff7f"; // Yeşil
+        }
+
+        // Koordinat Hesaplama
+        // X ekseni: Zaman (Veri sayısı)
+        // Y ekseni: Çarpan (Logaritmik veya Lineer ölçekleme yapılabilir, burada basit oranlama yapıyoruz)
+        
+        // Dinamik Ölçekleme: Grafiğin en yüksek değeri her zaman canvas'ın %10'u kadar boşluk bırakır
+        let maxVal = Math.max(...grafikVerisi, 2.0); // En az 2.0x tavanı olsun
+        
+        const widthStep = canvas.width / (grafikVerisi.length - 1);
+        
+        grafikVerisi.forEach((val, index) => {
+            let x = index * widthStep;
             
-            document.querySelector('.hiz-ayarlari .aktif').classList.remove('aktif');
-            this.classList.add('aktif');
-            oyunHiziMs = parseInt(this.dataset.speed);
+            // Y ekseni ters (0,0 sol üsttür). Değeri normalleştiriyoruz.
+            // val=1.00 -> En alt (canvas.height)
+            // val=maxVal -> En üst
+            
+            // Eğer crash olduysa son değer 0'dır, onu en alta çekelim
+            if (val === 0) val = 1.0; 
+
+            let normalizedY = (val - 1.0) / (maxVal - 1.0); // 0 ile 1 arası
+            let y = canvas.height - (normalizedY * (canvas.height * 0.8)) - 20; // 20px alt boşluk
+
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         });
-    });
 
-    document.getElementById('otoStratejiSwitch').addEventListener('click', function() {
-        this.classList.toggle('on');
-    });
+        ctx.stroke();
+        
+        // Alanı doldur (Gradient)
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.closePath();
+        
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        if (oyunDurumu === 'bitti' && uiCarpan.classList.contains('crash')) {
+            gradient.addColorStop(0, "rgba(255, 77, 77, 0.5)");
+            gradient.addColorStop(1, "rgba(255, 77, 77, 0.0)");
+        } else {
+            gradient.addColorStop(0, "rgba(0, 255, 127, 0.5)");
+            gradient.addColorStop(1, "rgba(0, 255, 127, 0.0)");
+        }
+        ctx.fillStyle = gradient;
+        ctx.fill();
+    }
 
-    window.onload = () => {
-        updateUI();
-        const grafikAlani = document.querySelector('.grafik-alani');
-        canvas.width = grafikAlani.clientWidth - 4; 
-        canvas.height = grafikAlani.clientHeight - 4;
-        cizGrafik();
-    };
-    
-    // JavaScript Bitişi
+    // Sonuç Listesi Yönetimi
+    function sonucEkle(deger, kazandi) {
+        const div = document.createElement('div');
+        div.className = `sonuc-item ${kazandi ? 'kazanc' : 'kayip'}`;
+        div.textContent = deger.toFixed(2) + 'x';
+        
+        // Başa ekle
+        uiListe.prepend(div);
+        
+        // Max 15 sonuç tut
+        if (uiListe.children.length > 15) {
+            uiListe.lastElementChild.remove();
+        }
+    }
+
+    // Başlangıç Ayarları
+    updateUI();
 </script>
 
 </body>
