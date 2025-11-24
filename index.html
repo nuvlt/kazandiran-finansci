@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Gerçekçi Borsa Hızı</title>
+    <title>Kazandıran Finansçı - Pro Volatilite</title>
     <style>
-        /* CSS Kodu */
+        /* CSS Kodu - AYNI */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0d1e3a; 
@@ -56,7 +56,6 @@
             border: 2px solid #00ff7f;
             border-radius: 8px;
             margin-bottom: 20px;
-            /* Grid Deseni */
             background-image: 
                 linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px);
@@ -166,7 +165,6 @@
 <body>
 
 <div class="oyun-container">
-
     <div class="header">
         <div class="title">🚀 KAZANDIRAN FİNANSÇI</div>
         <div class="bakiye" id="bakiyeGosterge">₺100.00</div>
@@ -217,14 +215,11 @@
 </div>
 
 <script>
-    // --- AYARLAR ---
+    // --- OYUN AYARLARI ---
     const MAX_KAZANC = 10000000.00;
-    
-    // --- HIZ KONTROLÜ (EN ÖNEMLİ KISIM) ---
-    // Burası oyunun "Tick Rate"ini belirler.
-    // 250ms = Saniyede sadece 4 kez güncelleme yapar. Bu da çok tane tane bir görüntü verir.
-    let UPDATE_INTERVAL = 250; 
-    
+    const GRAFIK_NOKTA_SIKLIGI = 1; 
+    let UPDATE_INTERVAL = 200; // 200ms (Yavaş ve net)
+
     // Değişkenler
     let bakiye = 100.00;
     let aktifBahis = 10.00;
@@ -232,12 +227,12 @@
     let mevcutCarpan = 1.00;
     let oyunHiziCarpani = 1.0; 
     let animasyonFrameId;
-    let sonGuncellemeZamani = 0; // Hız kontrolü için zamanlayıcı
+    let sonGuncellemeZamani = 0;
     
-    // Borsa Modu Değişkenleri
+    // Matematiksel Değişkenler (Volatilite)
     let grafikNoktalari = []; 
-    let trend = 0.002; 
-    let crashHedefi = 0; 
+    let momentum = 0; // Fiyatın ivmesi (Hız)
+    let trendHedefi = 1.5; // Fiyatın gitmek istediği gizli nokta
 
     // DOM
     const uiBakiye = document.getElementById('bakiyeGosterge');
@@ -251,7 +246,7 @@
     function resizeCanvas() {
         canvas.width = canvas.parentElement.clientWidth;
         canvas.height = canvas.parentElement.clientHeight;
-        if(grafikNoktalari.length > 0) drawGraph(); // Resize olunca tekrar çiz
+        if(grafikNoktalari.length > 0) drawGraph();
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -265,17 +260,8 @@
     function ayarlaBahis(d) { setBahis(aktifBahis + d); }
     function setHiz(x) { 
         oyunHiziCarpani = x; 
-        // Hız değiştikçe güncelleme sıklığını değiştiriyoruz
-        // 1.00x = 250ms, 2.00x = 125ms gibi.
         document.querySelectorAll('.hiz-ayarlari button').forEach(b => b.classList.remove('aktif'));
         event.target.classList.add('aktif');
-    }
-
-    function crashNoktasiUret() {
-        const r = Math.random();
-        let crash = 0.96 / (1 - r);
-        if(crash < 1.00) crash = 0.00; 
-        return Math.min(crash, 1000.00);
     }
 
     function oyunuBaslat() {
@@ -287,10 +273,10 @@
         oyunDurumu = 'oynuyor';
         mevcutCarpan = 1.00;
         grafikNoktalari = [{val: 1.00}]; 
-        trend = 0.005; // Başlangıç ivmesi
-        crashHedefi = crashNoktasiUret();
         
-        console.log("Hedef Crash:", crashHedefi.toFixed(2));
+        // Başlangıç Değerleri
+        momentum = 0.01; // Hafif yukarı başla
+        trendHedefi = 1.50; // İlk hedef
 
         uiBtn.textContent = "TOPLA";
         uiBtn.classList.add('topla-modu');
@@ -305,159 +291,194 @@
     function oyunDongusu(zaman) {
         if (oyunDurumu !== 'oynuyor') return;
 
-        // --- HIZ KONTROL MEKANİZMASI ---
-        // Bilgisayar ne kadar hızlı olursa olsun, biz sadece belirlediğimiz milisaniye geçince işlem yaparız.
         let hedeflenenSure = UPDATE_INTERVAL / oyunHiziCarpani;
         
         if (zaman - sonGuncellemeZamani > hedeflenenSure) {
             sonGuncellemeZamani = zaman;
-            birAdimIlerle(); // Sadece zamanı gelince bir adım at
+            birAdimIlerle();
         }
 
         requestAnimationFrame(oyunDongusu);
     }
 
     function birAdimIlerle() {
-        // --- BORSA HAREKETİ ---
-        // Her "Tick"te ne kadar değişecek?
-        // Rastgelelik: -0.01 ile +0.02 arası (Çok küçük adımlar)
-        let oynaklik = (Math.random() - 0.4) * 0.03; 
+        // --- PRO VOLATİLİTE ALGORİTMASI ---
         
-        // Trend Yönetimi
-        if (mevcutCarpan < crashHedefi * 0.8) {
-            trend += 0.0002; // Hedefe uzaksa hafif gaz ver
-        } else {
-            trend -= 0.0005; // Hedefe yaklaştıysa veya geçtiyse aşağı çekmeye çalış
-        }
+        // 1. Rastgele Kuvvet (Piyasa Gürültüsü)
+        // -0.02 ile +0.02 arasında değişir.
+        let piyasaGurultusu = (Math.random() - 0.5) * 0.04; 
+        
+        // 2. Momentum Değişimi
+        // Momentum aniden değişmez, yavaşça değişir (İvme mantığı)
+        momentum += piyasaGurultusu;
+        
+        // Momentum Sınırla (Çok aşırı hızlanmasın)
+        if (momentum > 0.05) momentum = 0.05;
+        if (momentum < -0.04) momentum = -0.04; // Aşağı düşüş hızı
+        
+        // 3. Yerçekimi (Gravity) - RTP Koruması
+        // Çarpan yükseldikçe, aşağı çekme kuvveti artar.
+        // Çarpan 1.00 altındaysa, yukarı itme kuvveti oluşur (Toparlanma şansı)
+        let yerCekimi = 0;
+        if (mevcutCarpan > 2.0) yerCekimi = -0.01 * (mevcutCarpan / 2);
+        if (mevcutCarpan < 0.8) yerCekimi = 0.015; // Dipten dönüş desteği
 
-        let yeniDeger = mevcutCarpan + oynaklik + trend;
+        // Yeni Değeri Hesapla
+        let degisim = momentum + yerCekimi;
+        let yeniDeger = mevcutCarpan + degisim;
         
-        // Asla 0.10 altına düşmesin oyun sürerken
-        if (yeniDeger < 0.10) yeniDeger = 0.10;
+        // Min 0.10'a kadar düşebilir (0.00 olamaz oyun sürerken)
+        if (yeniDeger < 0.10) {
+            yeniDeger = 0.10;
+            momentum = 0.02; // Dipten sekme efekti
+        }
         
         mevcutCarpan = yeniDeger;
 
-        // --- BİTİŞ KONTROLLERİ ---
+        // --- BİTİŞ & CRASH KONTROLLERİ ---
         
-        // 1. Crash Kontrolü (Olasılık bazlı)
-        // Çarpan hedefi geçtiyse %100 değil ama çok yüksek ihtimalle patlar
-        // Hedefe gelmediyse bile düşük ihtimalle patlayabilir (Borsa çöküşü)
-        let riskFaktoru = 0;
-        if (mevcutCarpan >= crashHedefi) riskFaktoru = 0.5; // %50 şans her tickte
-        else if (mevcutCarpan > 1.5) riskFaktoru = 0.005; // Küçük şans
+        // Crash Olasılığı (RTP Dengesi)
+        // Çarpan yükseldikçe patlama riski artar.
+        // Çarpan 1.00 altındayken bile patlayabilir (Zararına kapanış)
+        let patlamaRiski = 0.01; // %1 taban risk
+        
+        if (mevcutCarpan > 1.5) patlamaRiski = 0.03;
+        if (mevcutCarpan > 3.0) patlamaRiski = 0.08;
+        if (mevcutCarpan > 10.0) patlamaRiski = 0.20;
 
-        if (Math.random() < riskFaktoru) {
-             mevcutCarpan = 0.00; // Crash
+        // Eğer momentum aşağı ise ve çarpan düşükse, "Panic Sell" crash riski
+        if (mevcutCarpan < 0.7 && momentum < -0.01) patlamaRiski = 0.05;
+
+        if (Math.random() < patlamaRiski) {
+             mevcutCarpan = 0.00; // CRASH!
              oyunuBitir(false);
              return;
         }
 
-        // 2. Max Kazanç
+        // Max Kazanç
         if (mevcutCarpan * aktifBahis > MAX_KAZANC) {
             oyunuBitir(true);
             return;
         }
 
-        // --- GRAFİĞE NOKTA EKLEME ---
-        // Artık her adımda nokta ekliyoruz çünkü adımlarımız zaten yavaş (250ms)
+        // --- VERİ KAYDI ---
         grafikNoktalari.push({ val: parseFloat(mevcutCarpan.toFixed(2)) });
-        
-        // Ekrana sığsın diye eski verileri sil (Kaydırma Efekti)
-        if(grafikNoktalari.length > 40) grafikNoktalari.shift();
+        if(grafikNoktalari.length > 50) grafikNoktalari.shift();
 
         // UI Güncelle
         uiCarpan.textContent = mevcutCarpan.toFixed(2) + "x";
         
-        if (mevcutCarpan < 1.00) uiCarpan.style.color = "#ffaa00"; // Düşüşte Turuncu
-        else uiCarpan.style.color = "#00ff7f"; // Yükselişte Yeşil
+        if (mevcutCarpan < 1.00) {
+            uiCarpan.style.color = "#ffaa00"; // Turuncu (Zarar Bölgesi)
+        } else {
+            uiCarpan.style.color = "#00ff7f"; // Yeşil (Kar Bölgesi)
+        }
 
         drawGraph();
     }
 
-    function oyunuBitir(kazandi) {
+    function oyunuBitir(otomatikKazandi) {
         oyunDurumu = 'bitti';
         cancelAnimationFrame(animasyonFrameId);
         
         uiBtn.textContent = "OYNA";
         uiBtn.classList.remove('topla-modu');
 
-        if (kazandi) {
-            let kazanc = (aktifBahis * mevcutCarpan) * 0.68;
-            bakiye += kazanc;
-            sonucEkle(mevcutCarpan, true);
+        // Eğer kullanıcı manuel topladıysa (otomatikKazandi = true)
+        // VE çarpan 1.00 üzerindeyse kazanır.
+        // Eğer çarpan 0.31x ise ve topladıysa, 3.1 TL alır (Zarar eder ama kalanını kurtarır)
+        
+        if (otomatikKazandi || (mevcutCarpan > 0 && mevcutCarpan !== 0.00)) {
+            // Kazanç/İade Hesapla
+            let geriOdeme = aktifBahis * mevcutCarpan;
+            
+            // Eğer kar ettiyse (carpan > 1) kesinti uygula
+            if (mevcutCarpan > 1.00) {
+                let kar = geriOdeme - aktifBahis;
+                let netKar = kar * 0.68; // %32 kesinti
+                geriOdeme = aktifBahis + netKar;
+                sonucEkle(mevcutCarpan, true); // Yeşil Sonuç
+            } else {
+                // Zararına bozdurma
+                sonucEkle(mevcutCarpan, false); // Kırmızı Sonuç (Çünkü zarar)
+            }
+            
+            bakiye += geriOdeme;
+            
         } else {
-            // Kayıp
-            mevcutCarpan = 0.01; 
-            uiCarpan.textContent = "0.01x";
+            // Crash Oldu (0.00x)
+            mevcutCarpan = 0.00; 
+            uiCarpan.textContent = "CRASH";
             uiCarpan.classList.add('crash');
             
-            // Son noktayı dibe çak
-            grafikNoktalari.push({ val: 0.01 });
+            grafikNoktalari.push({ val: 0.00 });
             drawGraph();
-            sonucEkle(0.01, false);
+            sonucEkle(0.00, false);
         }
         updateUI();
     }
 
     function oynaVeyaTopla() {
-        if(oyunDurumu === 'bekliyor' || oyunDurumu === 'bitti') oyunuBaslat();
-        else if(oyunDurumu === 'oynuyor' && mevcutCarpan > 1.00) oyunuBitir(true);
+        if(oyunDurumu === 'bekliyor' || oyunDurumu === 'bitti') {
+            oyunuBaslat();
+        } else if(oyunDurumu === 'oynuyor') {
+            // Toplama işlemi: 1.00x altında da toplayabilir (Bakiye kurtarma)
+            oyunuBitir(true); 
+        }
     }
 
     function sonucEkle(val, win) {
         const d = document.createElement('div');
-        d.className = `sonuc-item ${win ? 'kazanc' : 'kayip'}`;
-        d.innerText = val.toFixed(2) + 'x';
+        // Eğer 1.00 üstü ve win ise yeşil, yoksa kırmızı
+        let stil = (val >= 1.00 && win) ? 'kazanc' : 'kayip';
+        d.className = `sonuc-item ${stil}`;
+        
+        if (val === 0.00) d.innerText = "CRASH";
+        else d.innerText = val.toFixed(2) + 'x';
+        
         uiListe.prepend(d);
         if(uiListe.children.length > 20) uiListe.lastElementChild.remove();
     }
 
-    // --- KARE DÜĞÜMLÜ GRAFİK ---
+    // --- GRAFİK ÇİZİMİ ---
     function drawGraph() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (grafikNoktalari.length < 2) return;
 
-        // Ölçekleme (Y ekseni)
-        // Max değer grafikteki en yüksek değerin biraz fazlası olsun
         let maxVal = 1.5; 
         grafikNoktalari.forEach(p => { if(p.val > maxVal) maxVal = p.val; });
         maxVal = maxVal * 1.2; 
 
         const w = canvas.width;
         const h = canvas.height;
-        const padding = 30; // Kenar boşluğu
+        const padding = 30;
 
-        // 1. Çizgiyi Çiz
+        // Çizgi
         ctx.beginPath();
         ctx.lineWidth = 3;
-        ctx.strokeStyle = "#00ff7f"; // Ana renk
         
-        // Eğer son değer 0.01 ise çizgi rengini kırmızıya çevirebiliriz (Crash anı)
+        // Çizgi Rengi (Anlık duruma göre)
+        if (mevcutCarpan < 1.00) ctx.strokeStyle = "#ffaa00";
+        else ctx.strokeStyle = "#00ff7f";
+        
         if (grafikNoktalari[grafikNoktalari.length-1].val <= 0.01) ctx.strokeStyle = "#ff4d4d";
 
         grafikNoktalari.forEach((p, i) => {
-            // X: Eşit aralıklarla dağıt
             let x = (i / (grafikNoktalari.length - 1)) * w;
-            
-            // Y: Değere göre
             let y = h - ((p.val / maxVal) * (h - padding));
-
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
         ctx.stroke();
 
-        // 2. Kare Düğümleri (Nodes) Çiz - İstediğin Görsel
+        // Kareler
         grafikNoktalari.forEach((p, i) => {
             let x = (i / (grafikNoktalari.length - 1)) * w;
             let y = h - ((p.val / maxVal) * (h - padding));
 
-            // Renk Mantığı
-            if (p.val <= 0.01) ctx.fillStyle = "#ff4d4d"; // Crash (Kırmızı)
-            else if (p.val < 1.00) ctx.fillStyle = "#ffaa00"; // Düşüş (Turuncu)
-            else ctx.fillStyle = "#00ff7f"; // Yükseliş (Yeşil)
+            if (p.val <= 0.01) ctx.fillStyle = "#ff4d4d";
+            else if (p.val < 1.00) ctx.fillStyle = "#ffaa00";
+            else ctx.fillStyle = "#00ff7f";
 
-            // Son nokta (Canlı uç) parlasın
             if (i === grafikNoktalari.length - 1 && oyunDurumu === 'oynuyor') {
                  ctx.fillStyle = "#ffffff"; 
                  ctx.shadowBlur = 10;
@@ -465,8 +486,6 @@
             } else {
                  ctx.shadowBlur = 0;
             }
-
-            // Kare çizimi (8x8 pixel) - Ekran görüntüsündeki gibi
             ctx.fillRect(x - 4, y - 4, 8, 8);
         });
     }
