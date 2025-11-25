@@ -163,6 +163,7 @@
     const MAX_KAZANC = 10000000.00;
     let UPDATE_INTERVAL = 150; 
     
+    // BAKIYE VE BAHİS
     let bakiye = 100.00;
     let aktifBahis = 10.00;
     const BASLANGIC_BAHIS = 10.00; 
@@ -173,17 +174,20 @@
     let animasyonFrameId;
     let sonGuncellemeZamani = 0;
 
+    // OTO STRATEJİ & OTO BET DEĞİŞKENLERİ
     let otoStratejiAktif = false;
-    let otoToplamaCarpani = 1.20; 
+    let otoToplamaCarpani = 1.20; // Varsayılan değer
     let otoBetAktif = false;
     let oynananElSayisi = 0;
     let sonElDurumu = 'baslangic'; 
 
+    // Volatilite Değişkenleri
     let grafikNoktalari = []; 
     let dalgaFazı = 0; 
     let anaTrend = 0; 
     let dinamikZoom = 1.0; 
 
+    // DOM DEĞİŞKENLERİ
     const uiBakiye = document.getElementById('bakiyeGosterge');
     const uiBahis = document.getElementById('aktifBahisGosterge');
     const uiCarpan = document.getElementById('carpanGosterge');
@@ -192,6 +196,7 @@
     const canvas = document.getElementById('grafikCanvas');
     const backgroundMusic = document.getElementById('backgroundMusic');
     
+    // OTO DOM
     const otoSwitch = document.getElementById('otoStratejiSwitch');
     const otoCarpanInput = document.getElementById('otoCarpanInput');
     const otoBaslatDurdurBtn = document.getElementById('otoBaslatDurdurBtn');
@@ -210,6 +215,7 @@
             console.error("Grafik tuvali bulunamadı.");
         }
         updateUI(); 
+        guncelleOtoCarpan(); // Sayfa yüklendiğinde varsayılanı okusun
     });
 
     function resizeCanvas() {
@@ -224,19 +230,21 @@
         uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
     
-    // --- OTO STRATEJİ GÜNCELLEME (DÜZELTİLDİ) ---
-    // Hem 'change' hem 'input' dinleyerek değeri garantiye alıyoruz
+    // --- OTO STRATEJİ GÜNCELLEME FONKSİYONU ---
     function guncelleOtoCarpan() {
         let val = parseFloat(otoCarpanInput.value);
         if (isNaN(val) || val < 1.01) val = 1.01;
         otoToplamaCarpani = val;
-        // Input görselini hemen düzeltme (kullanıcı yazarken rahatsız etmesin)
     }
+    
+    // Input kutusuna yazıldıkça değeri sürekli güncel tut.
     otoCarpanInput.addEventListener('input', guncelleOtoCarpan);
+    // Kutudan çıkıldığında veya Enter'a basıldığında değeri formatla.
     otoCarpanInput.addEventListener('change', () => {
         guncelleOtoCarpan();
         otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
     });
+    // ------------------------------------------
 
     function toggleOtoBet() {
         if (oyunDurumu === 'oynuyor') return;
@@ -313,7 +321,7 @@
         otoStratejiAktif = !otoStratejiAktif;
         if (otoStratejiAktif) {
             otoSwitch.classList.add('on');
-            guncelleOtoCarpan(); // Açılırken değeri güncelle
+            guncelleOtoCarpan(); // Açılırken değeri oku
         } else {
             otoSwitch.classList.remove('on');
         }
@@ -338,12 +346,11 @@
             return; 
         }
         
-        // --- FIX: OTO CASH OUT DEĞERİNİ ZORLA GÜNCELLE ---
+        // --- KRİTİK DÜZELTME: OTO CASH OUT DEĞERİNİ SADECE AKTİFSE ZORLA GÜNCELLE ---
         if (otoStratejiAktif) {
-            guncelleOtoCarpan();
-            console.log("Oyun Başladı. Hedef Cashout:", otoToplamaCarpani);
+            guncelleOtoCarpan(); // Oyun başlarken son yazılan değeri zorla oku
         }
-        // -------------------------------------------------
+        // -------------------------------------------------------------------------
         
         try {
             if (backgroundMusic.paused) {
@@ -386,8 +393,7 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KONTROLÜ ---
-        // Hedefe ulaşıldı mı kontrolü
+        // --- OTO TOPLAMA KONTROLÜ (Mevcut Carpan > = Hedef ise Topla) ---
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
             if (mevcutCarpan >= otoToplamaCarpani) {
                 oyunuBitir(true); 
