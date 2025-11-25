@@ -224,6 +224,20 @@
         uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
     
+    // --- OTO STRATEJİ GÜNCELLEME (DÜZELTİLDİ) ---
+    // Hem 'change' hem 'input' dinleyerek değeri garantiye alıyoruz
+    function guncelleOtoCarpan() {
+        let val = parseFloat(otoCarpanInput.value);
+        if (isNaN(val) || val < 1.01) val = 1.01;
+        otoToplamaCarpani = val;
+        // Input görselini hemen düzeltme (kullanıcı yazarken rahatsız etmesin)
+    }
+    otoCarpanInput.addEventListener('input', guncelleOtoCarpan);
+    otoCarpanInput.addEventListener('change', () => {
+        guncelleOtoCarpan();
+        otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
+    });
+
     function toggleOtoBet() {
         if (oyunDurumu === 'oynuyor') return;
 
@@ -299,9 +313,7 @@
         otoStratejiAktif = !otoStratejiAktif;
         if (otoStratejiAktif) {
             otoSwitch.classList.add('on');
-            let val = parseFloat(otoCarpanInput.value);
-            otoToplamaCarpani = Math.max(val, 1.01); 
-            otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
+            guncelleOtoCarpan(); // Açılırken değeri güncelle
         } else {
             otoSwitch.classList.remove('on');
         }
@@ -325,6 +337,13 @@
             }
             return; 
         }
+        
+        // --- FIX: OTO CASH OUT DEĞERİNİ ZORLA GÜNCELLE ---
+        if (otoStratejiAktif) {
+            guncelleOtoCarpan();
+            console.log("Oyun Başladı. Hedef Cashout:", otoToplamaCarpani);
+        }
+        // -------------------------------------------------
         
         try {
             if (backgroundMusic.paused) {
@@ -367,6 +386,8 @@
     }
 
     function birAdimIlerle() {
+        // --- OTO TOPLAMA KONTROLÜ ---
+        // Hedefe ulaşıldı mı kontrolü
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
             if (mevcutCarpan >= otoToplamaCarpani) {
                 oyunuBitir(true); 
@@ -498,7 +519,6 @@
         if(uiListe.children.length > 20) uiListe.lastElementChild.remove();
     }
 
-    // --- DİNAMİK GRAFİK ÇİZİMİ (AKILLI KAMERA SİSTEMİ) ---
     function drawGraph() {
         if (!ctx) return; 
 
@@ -516,28 +536,21 @@
 
         const w = canvas.width;
         const h = canvas.height;
-        const padding = 40; // Padding'i artırdık
+        const padding = 40; 
 
-        // 1. Y-Ekseni Penceresini (Viewport) Hesapla
         let maxY = 1.5;
-        // En yüksek tepeyi bul
         grafikNoktalari.forEach(p => { if(p.val > maxY) maxY = p.val; });
-        // Tepenin biraz üstünü göster
         maxY = maxY * 1.2; 
 
         let minY = 0;
-        // Düşüşteyse veya Crash olduysa zemini aşağı kaydır
         if (mevcutCarpan <= 0.01) {
-            minY = -0.05; // CRASH çizgisi net görünsün
+            minY = -0.05; 
         } else if (mevcutCarpan < 0.8) {
-            // Dip görünümü için dinamik alt sınır
             minY = Math.min(0, mevcutCarpan - 0.3); 
         }
         
-        // Pencere aralığı
         let yRange = maxY - minY;
 
-        // 2. Çizgi Çizimi
         ctx.beginPath();
         ctx.lineWidth = 3;
         
@@ -547,14 +560,12 @@
 
         grafikNoktalari.forEach((p, i) => {
             let x = (i / (grafikNoktalari.length - 1)) * w;
-            // Yeni Y Formülü: Değeri pencere aralığına göre orantıla
             let y = h - padding - ((p.val - minY) / yRange * (h - 2 * padding));
             
             if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
         ctx.stroke();
 
-        // 3. Kareler (Düğümler) Çizimi
         grafikNoktalari.forEach((p, i) => {
             let x = (i / (grafikNoktalari.length - 1)) * w;
             let y = h - padding - ((p.val - minY) / yRange * (h - 2 * padding));
@@ -570,7 +581,6 @@
             } else {
                  ctx.shadowBlur = 0;
             }
-            // Kare boyutunu biraz büyüttük (8 -> 10)
             ctx.fillRect(x - 5, y - 5, 10, 10);
         });
     }
