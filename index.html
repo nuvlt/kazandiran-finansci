@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>👴 Zengin Dede - Final Sürüm</title>
     <style>
-        /* BASE CSS - AYNI KALDI */
+        /* BASE CSS */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
         .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
         .title { font-size: 32px; font-weight: bold; color: #00ff7f; text-shadow: 0 0 5px #00ff7f; }
         .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; }
         .grafik-alani { position: relative; height: 350px; background-color: #0a1728; border: 2px solid #00ff7f; border-radius: 8px; margin-bottom: 20px; background-image: linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px); background-size: 40px 40px; overflow: hidden; }
-        /* carpan-gosterge: Crash anında daha belirgin olması için text-shadow eklendi */
         .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
         .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 30px rgba(255, 77, 77, 0.8); border-color: #ff4d4d; }
         #grafikCanvas { position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; } 
@@ -206,6 +205,7 @@
 
     let ctx; 
 
+    // --- BAŞLANGIÇ ---
     document.addEventListener('DOMContentLoaded', () => {
         if (canvas) {
             ctx = canvas.getContext('2d');
@@ -215,7 +215,7 @@
             console.error("Grafik tuvali bulunamadı.");
         }
         updateUI(); 
-        guncelleOtoCarpan(); // Sayfa yüklendiğinde varsayılanı okusun
+        guncelleOtoCarpan(); // Sayfa yüklendiğinde varsayılanı oku
     });
 
     function resizeCanvas() {
@@ -321,7 +321,7 @@
         otoStratejiAktif = !otoStratejiAktif;
         if (otoStratejiAktif) {
             otoSwitch.classList.add('on');
-            guncelleOtoCarpan(); // Açılırken değeri oku
+            guncelleOtoCarpan(); 
         } else {
             otoSwitch.classList.remove('on');
         }
@@ -346,11 +346,10 @@
             return; 
         }
         
-        // --- KRİTİK DÜZELTME: OTO CASH OUT DEĞERİNİ SADECE AKTİFSE ZORLA GÜNCELLE ---
+        // KRİTİK: OTO CASH OUT DEĞERİNİ SADECE AKTİFSE ZORLA GÜNCELLE
         if (otoStratejiAktif) {
-            guncelleOtoCarpan(); // Oyun başlarken son yazılan değeri zorla oku
+            guncelleOtoCarpan(); 
         }
-        // -------------------------------------------------------------------------
         
         try {
             if (backgroundMusic.paused) {
@@ -393,14 +392,16 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KONTROLÜ (Mevcut Carpan > = Hedef ise Topla) ---
+        // --- OTO TOPLAMA KRİTİK KONTROL ---
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
+            // Kontrol: Mevcut çarpan, kullanıcının belirlediği hedefe ulaştı mı?
             if (mevcutCarpan >= otoToplamaCarpani) {
-                oyunuBitir(true); 
+                oyunuBitir(true); // Topla modunda bitir
                 return;
             }
         }
         
+        // OYUN İSTATİSTİKLERİ VE VOLATİLİTE HESAPLARI (Aynı kaldı)
         dalgaFazı += 0.2; 
         let dalgaEtkisi = Math.sin(dalgaFazı) * 0.10; 
         let gurultu = (Math.random() - 0.5) * 0.15; 
