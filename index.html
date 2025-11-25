@@ -215,7 +215,7 @@
             console.error("Grafik tuvali bulunamadı.");
         }
         updateUI(); 
-        guncelleOtoCarpan(); // Sayfa yüklendiğinde varsayılanı oku
+        guncelleOtoCarpan(); 
     });
 
     function resizeCanvas() {
@@ -233,6 +233,7 @@
     // --- OTO STRATEJİ GÜNCELLEME FONKSİYONU ---
     function guncelleOtoCarpan() {
         let val = parseFloat(otoCarpanInput.value);
+        // Minimum çarpanı 1.01 olarak zorla
         if (isNaN(val) || val < 1.01) val = 1.01;
         otoToplamaCarpani = val;
     }
@@ -392,16 +393,20 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KRİTİK KONTROL ---
+        // --- OTO TOPLAMA KRİTİK KONTROL (KAYAN NOKTA HASSASİYETİ DÜZELTİLDİ) ---
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
-            // Kontrol: Mevcut çarpan, kullanıcının belirlediği hedefe ulaştı mı?
-            if (mevcutCarpan >= otoToplamaCarpani) {
-                oyunuBitir(true); // Topla modunda bitir
+            // Kontrol için iki ondalık basamağa yuvarlayarak karşılaştırma yapılır.
+            const yuvarlakMevcutCarpan = Math.round(mevcutCarpan * 100) / 100;
+            const yuvarlakHedefCarpan = Math.round(otoToplamaCarpani * 100) / 100;
+            
+            if (yuvarlakMevcutCarpan >= yuvarlakHedefCarpan) {
+                oyunuBitir(true); 
                 return;
             }
         }
+        // --------------------------------------------------------------------------
         
-        // OYUN İSTATİSTİKLERİ VE VOLATİLİTE HESAPLARI (Aynı kaldı)
+        // OYUN İSTATİSTİKLERİ VE VOLATİLİTE HESAPLARI
         dalgaFazı += 0.2; 
         let dalgaEtkisi = Math.sin(dalgaFazı) * 0.10; 
         let gurultu = (Math.random() - 0.5) * 0.15; 
