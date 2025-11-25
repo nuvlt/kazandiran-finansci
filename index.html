@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kazandıran Finansçı - Oto Strateji Modu</title>
+    <title>Kazandıran Finansçı - Full Volatilite</title>
     <style>
-        /* CSS AYNI KALDI */
+        /* CSS Kodu (Önceki Sürümden) */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
         .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
@@ -15,7 +15,7 @@
         .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; }
         .carpan-gosterge.dusuyor { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.4); }
         .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 20px rgba(255, 77, 77, 0.6); }
-        #grafikCanvas { position: absolute; top: 0; left: 0; }
+        #grafikCanvas { position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; /* Zoom için yumuşak geçiş */ } 
         .kontrol-paneli { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .hiz-ayarlari { grid-column: 1 / span 3; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
         .hiz-ayarlari button { background-color: #1e3d6d; color: #fff; padding: 8px 15px; border: 1px solid #1e90ff; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
@@ -36,44 +36,22 @@
         #oynaToplaBtn:active { box-shadow: 0 2px #00994d; transform: translateY(3px); }
         #oynaToplaBtn.topla-modu { background-color: #ffaa00; box-shadow: 0 5px #cc8800; }
         #oynaToplaBtn.topla-modu:active { box-shadow: 0 2px #cc8800; }
-        
-        /* OTO STRATEJİ YENİ CSS */
-        .oto-strateji { 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            background-color: #0a1728; 
-            padding: 8px; 
-            border-radius: 5px;
-        }
-        .oto-strateji-grup {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #otoCarpanInput {
-            width: 70px;
-            padding: 5px;
-            border: 1px solid #1e90ff;
-            border-radius: 4px;
-            background-color: #1e3d6d;
-            color: #fff;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        #otoStratejiSwitch {
-            min-width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer;
-        }
+        .oto-strateji { display: flex; align-items: center; gap: 5px; background-color: #0a1728; padding: 8px; border-radius: 5px; }
+        .oto-strateji-grup { display: flex; flex-direction: column; align-items: center; }
+        #otoCarpanInput { width: 70px; padding: 5px; border: 1px solid #1e90ff; border-radius: 4px; background-color: #1e3d6d; color: #fff; text-align: center; font-size: 14px; }
+        #otoStratejiSwitch { min-width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer; }
         #otoStratejiSwitch.on { background-color: #00ff7f; }
-        #otoStratejiSwitch .slider {
-            width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s;
-        }
+        #otoStratejiSwitch .slider { width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s; }
         #otoStratejiSwitch.on .slider { transform: translateX(30px); }
         .not { grid-column: 1 / span 3; font-size: 11px; color: #8899aa; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
+
+<audio id="backgroundMusic" loop>
+    <source src="background.mp3" type="audio/mpeg">
+    Tarayıcınız ses etiketini desteklemiyor.
+</audio>
 
 <div class="oyun-container">
     <div class="header">
@@ -127,7 +105,7 @@
                     <span style="font-size: 10px;">TOPLAMA ÇARPANI</span>
                 </div>
             </div>
-            </div>
+        </div>
         
         <div class="not">Kazançlarda %32 kesinti uygulanır. Max Kazanç: ₺10.000.000</div>
     </div>
@@ -146,7 +124,7 @@
     let animasyonFrameId;
     let sonGuncellemeZamani = 0;
 
-    // --- YENİ OTO STRATEJİ DEĞİŞKENLERİ ---
+    // Oto Strateji Değişkenleri
     let otoStratejiAktif = false;
     let otoToplamaCarpani = 1.20; 
     
@@ -154,6 +132,7 @@
     let grafikNoktalari = []; 
     let dalgaFazı = 0; 
     let anaTrend = 0; 
+    let dinamikZoom = 1.0; // YENİ: Zoom seviyesi (1.0 = Normal)
 
     // DOM
     const uiBakiye = document.getElementById('bakiyeGosterge');
@@ -163,6 +142,7 @@
     const uiListe = document.getElementById('sonuclarListesi');
     const canvas = document.getElementById('grafikCanvas');
     const ctx = canvas.getContext('2d');
+    const backgroundMusic = document.getElementById('backgroundMusic'); // YENİ: Müzik DOM
     
     // OTO DOM
     const otoSwitch = document.getElementById('otoStratejiSwitch');
@@ -181,32 +161,27 @@
         uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
     
-    // --- OTO STRATEJİ FONKSİYONLARI ---
+    // OTO STRATEJİ VE GENEL FONKSİYONLAR (DEĞİŞMEDİ)
     function toggleOtoStrateji() {
-        if(oyunDurumu === 'oynuyor') return; // Oyun oynanırken değiştirilemez
+        if(oyunDurumu === 'oynuyor') return; 
         
         otoStratejiAktif = !otoStratejiAktif;
         if (otoStratejiAktif) {
             otoSwitch.classList.add('on');
-            // Giriş değerini al ve minimum 1.01 kontrolü yap
             let val = parseFloat(otoCarpanInput.value);
             otoToplamaCarpani = Math.max(val, 1.01); 
             otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
-            console.log("Oto Toplama Aktif:", otoToplamaCarpani + "x");
         } else {
             otoSwitch.classList.remove('on');
-            console.log("Oto Toplama Pasif");
         }
     }
     
-    // Input değişikliğini hemen yakala
     otoCarpanInput.addEventListener('change', () => {
         let val = parseFloat(otoCarpanInput.value);
         otoToplamaCarpani = Math.max(val, 1.01);
         otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
     });
 
-    // GENEL OYUN FONKSİYONLARI
     function setBahis(miktar) { if(oyunDurumu !== 'oynuyor') { aktifBahis = miktar; updateUI(); } }
     function ayarlaBahis(d) { setBahis(aktifBahis + d); }
     function setHiz(x) { 
@@ -218,6 +193,11 @@
     function oyunuBaslat() {
         if (bakiye < aktifBahis) { alert("Bakiye Yetersiz"); return; }
         
+        // MÜZİĞİ BAŞLAT (3. MADDE)
+        if (backgroundMusic.paused) {
+             backgroundMusic.play().catch(e => console.log("Müzik otomatik başlatılamadı:", e));
+        }
+
         bakiye -= aktifBahis;
         updateUI();
         
@@ -227,8 +207,8 @@
         
         dalgaFazı = Math.random() * 10;
         anaTrend = 0.01; 
+        dinamikZoom = 1.0; // Zoom reset
 
-        // Eğer oto aktifse, buton "TOPLA" bile olsa rengi farklı kalabilir (Opsiyonel görsel ayar)
         uiBtn.textContent = "TOPLA";
         uiBtn.classList.add('topla-modu');
         uiCarpan.textContent = "1.00x";
@@ -251,30 +231,34 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KONTROLÜ (KRİTİK) ---
+        // --- OTO TOPLAMA KONTROLÜ ---
         if (otoStratejiAktif) {
             if (mevcutCarpan >= otoToplamaCarpani) {
-                // Otomatik olarak topla ve işlemi sonlandır
                 oyunuBitir(true); 
                 return;
             }
         }
         
-        // --- VOLATİLİTE MATEMATİĞİ (AYNI KALDI) ---
+        // --- VOLATİLİTE MATEMATİĞİ (1. MADDE DEĞİŞİKLİKLERİ) ---
         dalgaFazı += 0.2; 
-        let dalgaEtkisi = Math.sin(dalgaFazı) * 0.05; 
-        let gurultu = (Math.random() - 0.5) * 0.08; 
+        // Dalga genliğini artırdık (0.05 -> 0.10)
+        let dalgaEtkisi = Math.sin(dalgaFazı) * 0.10; 
+        // Gürültüyü artırdık (0.08 -> 0.15)
+        let gurultu = (Math.random() - 0.5) * 0.15; 
         
-        if (mevcutCarpan < 0.80) anaTrend += 0.002;
+        // Ana trendde 0.50x'te kalma şansı için
+        if (mevcutCarpan < 0.80) anaTrend += 0.003; // Toparlanma gücü arttı
         else anaTrend = 0.015;
 
         let degisim = anaTrend + dalgaEtkisi + gurultu;
         
+        // Panik Satış düşüşü sertleşti
         if (Math.random() < 0.15) {
-            degisim -= 0.15;
+            degisim -= 0.20; 
         }
 
         let yeniDeger = mevcutCarpan + degisim;
+        let gercekDegisim = yeniDeger - mevcutCarpan;
         
         if (yeniDeger < 0.15) {
             yeniDeger = 0.15;
@@ -283,12 +267,22 @@
 
         mevcutCarpan = yeniDeger;
 
-        // --- CRASH KONTROLLERİ ---
+        // --- DİNAMİK ZOOM HESAPLAMA (2. MADDE) ---
+        // Yüksek değişim = yüksek zoom
+        let hiz = Math.abs(gercekDegisim) * 20; // Hız farkını ölç
+        if (mevcutCarpan > 2.00) hiz += 0.5; // Yüksek çarpanlarda otomatik yakınlaştır
+        
+        // Zoom seviyesini yavaşça hedefine yaklaştır (Yumuşak geçiş)
+        let hedefZoom = 1.0 + Math.min(hiz, 0.4); // Max %40 zoom
+        dinamikZoom += (hedefZoom - dinamikZoom) * 0.1; 
+
+        // --- CRASH KONTROLLERİ (1. MADDE DEĞİŞİKLİKLERİ) ---
+        // Yüksek çarpanlarda crash riski hafifçe düşürüldü
         let patlamaSansi = 0.005; 
-        if (mevcutCarpan < 0.50) patlamaSansi = 0.02;
-        if (mevcutCarpan > 2.0) patlamaSansi = 0.02;
-        if (mevcutCarpan > 5.0) patlamaSansi = 0.05;
-        if (mevcutCarpan > 10.0) patlamaSansi = 0.10;
+        if (mevcutCarpan < 0.50) patlamaSansi = 0.01; // 0.50x'te patlama şansı biraz azaldı
+        if (mevcutCarpan > 2.0) patlamaSansi = 0.015; // 2.0x'te risk azaldı
+        if (mevcutCarpan > 5.0) patlamaSansi = 0.04;
+        if (mevcutCarpan > 10.0) patlamaSansi = 0.08; // 10.0x üstü risk hafifçe azaldı
 
         if (Math.random() < patlamaSansi) {
              mevcutCarpan = 0.00;
@@ -321,7 +315,11 @@
         cancelAnimationFrame(animasyonFrameId);
         uiBtn.textContent = "OYNA";
         uiBtn.classList.remove('topla-modu');
+        
+        // MÜZİĞİ DURDUR
+        backgroundMusic.pause();
 
+        // Diğer bitiş işlemleri...
         if (otomatikKazandi || (mevcutCarpan > 0 && mevcutCarpan !== 0.00)) {
             let geriOdeme = aktifBahis * mevcutCarpan;
             if (mevcutCarpan > 1.00) {
@@ -341,6 +339,9 @@
             drawGraph();
             sonucEkle(0.00, false);
         }
+        // Zoom reset
+        dinamikZoom = 1.0; 
+        canvas.style.transform = `scale(1.0)`;
         updateUI();
     }
 
@@ -348,7 +349,6 @@
         if(oyunDurumu === 'bekliyor' || oyunDurumu === 'bitti') {
             oyunuBaslat();
         } else if(oyunDurumu === 'oynuyor') {
-            // Manuel Toplama
             oyunuBitir(true); 
         }
     }
@@ -363,11 +363,14 @@
         if(uiListe.children.length > 20) uiListe.lastElementChild.remove();
     }
 
-    // --- GRAFİK ÇİZİMİ ---
+    // --- GRAFİK ÇİZİMİ (2. MADDE DEĞİŞİKLİKLERİ) ---
     function drawGraph() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (grafikNoktalari.length < 2) return;
 
+        // DİNAMİK ZOOM UYGULAMA
+        canvas.style.transform = `scale(${dinamikZoom})`;
+        
         let maxVal = 1.5; 
         grafikNoktalari.forEach(p => { if(p.val > maxVal) maxVal = p.val; });
         maxVal = maxVal * 1.2; 
