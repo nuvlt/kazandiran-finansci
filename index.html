@@ -2,17 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-width, initial-scale=1.0">
-    <title>🧔🏻 Zengin Dede 🧔🏻</title> <style>
-        /* BASE CSS */
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👴 Zengin Dede - Final Sürüm</title>
+    <style>
+        /* BASE CSS - AYNI KALDI */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
         .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
         .title { font-size: 32px; font-weight: bold; color: #00ff7f; text-shadow: 0 0 5px #00ff7f; }
         .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; }
         .grafik-alani { position: relative; height: 350px; background-color: #0a1728; border: 2px solid #00ff7f; border-radius: 8px; margin-bottom: 20px; background-image: linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px); background-size: 40px 40px; overflow: hidden; }
-        .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; }
-        .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 20px rgba(255, 77, 77, 0.6); }
+        /* carpan-gosterge: Crash anında daha belirgin olması için text-shadow eklendi */
+        .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
+        .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 30px rgba(255, 77, 77, 0.8); border-color: #ff4d4d; }
         #grafikCanvas { position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; } 
         .kontrol-paneli { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .hiz-ayarlari { grid-column: 1 / span 3; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
@@ -43,15 +45,12 @@
         #otoStratejiSwitch .slider { width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s; }
         #otoStratejiSwitch.on .slider { transform: translateX(30px); }
         .note { grid-column: 1 / span 3; font-size: 11px; color: #8899aa; text-align: center; margin-top: 5px; }
-        
-        /* YENİ OTO OYNATMA STİLLERİ */
         .oto-input-group { display: flex; flex-direction: column; gap: 5px; }
         .oto-input-group label { font-size: 12px; color: #aaa; }
         .oto-input-group input, .oto-input-group select { padding: 8px; background-color: #1e3d6d; border: 1px solid #1e90ff; color: #fff; border-radius: 4px; }
         #otoBaslatDurdurBtn { padding: 15px; font-size: 18px; font-weight: bold; background-color: #904100; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
         #otoBaslatDurdurBtn.active { background-color: #ffaa00; }
         
-        /* --- MOBİL UYUMLULUK (RESPONSIVE) CSS --- */
         @media (max-width: 768px) {
             .oyun-container { padding: 10px; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -59,18 +58,12 @@
             .bakiye { font-size: 20px; }
             .grafik-alani { height: 250px; }
             .carpan-gosterge { font-size: 40px; top: 10px; }
-            
-            /* Kontrol paneli düzeni mobil için tek sütuna iner */
             .kontrol-paneli { grid-template-columns: 1fr; gap: 10px; }
             .sonuclar-alani { height: 100px; }
             .hiz-ayarlari { grid-column: 1; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
-            
-            /* Bahis ve Butonlar yan yana */
             .oyun-butonlari { flex-direction: row; gap: 10px; }
             #oynaToplaBtn { flex-grow: 1; padding: 15px; font-size: 18px; }
             .oto-strateji { flex-shrink: 0; }
-            
-            /* Oto ayarları mobil için dikey */
             .oto-ayarlar { grid-template-columns: 1fr; gap: 10px; padding: 10px 5px; }
         }
     </style>
@@ -83,7 +76,8 @@
 
 <div class="oyun-container">
     <div class="header">
-        <div class="title">🧔🏻 ZENGİN DEDE 💰</div> <div class="bakiye" id="bakiyeGosterge">₺100.00</div>
+        <div class="title">👴💰 ZENGİN DEDE</div>
+        <div class="bakiye" id="bakiyeGosterge">₺100.00</div>
     </div>
 
     <div class="grafik-alani">
@@ -169,7 +163,6 @@
     const MAX_KAZANC = 10000000.00;
     let UPDATE_INTERVAL = 150; 
     
-    // BAKIYE VE BAHİS
     let bakiye = 100.00;
     let aktifBahis = 10.00;
     const BASLANGIC_BAHIS = 10.00; 
@@ -180,20 +173,17 @@
     let animasyonFrameId;
     let sonGuncellemeZamani = 0;
 
-    // OTO STRATEJİ & OTO BET DEĞİŞKENLERİ
     let otoStratejiAktif = false;
     let otoToplamaCarpani = 1.20; 
     let otoBetAktif = false;
     let oynananElSayisi = 0;
     let sonElDurumu = 'baslangic'; 
 
-    // Volatilite Değişkenleri
     let grafikNoktalari = []; 
     let dalgaFazı = 0; 
     let anaTrend = 0; 
     let dinamikZoom = 1.0; 
 
-    // DOM DEĞİŞKENLERİ
     const uiBakiye = document.getElementById('bakiyeGosterge');
     const uiBahis = document.getElementById('aktifBahisGosterge');
     const uiCarpan = document.getElementById('carpanGosterge');
@@ -202,7 +192,6 @@
     const canvas = document.getElementById('grafikCanvas');
     const backgroundMusic = document.getElementById('backgroundMusic');
     
-    // OTO DOM
     const otoSwitch = document.getElementById('otoStratejiSwitch');
     const otoCarpanInput = document.getElementById('otoCarpanInput');
     const otoBaslatDurdurBtn = document.getElementById('otoBaslatDurdurBtn');
@@ -210,22 +199,18 @@
     const kayipStratejisiSelect = document.getElementById('kayipStratejisi');
     const kazancStratejisiSelect = document.getElementById('kazancStratejisi');
 
-    // KRİTİK: getContext buraya taşındı.
     let ctx; 
 
-    // --- KRİTİK BAŞLATMA VE DÜZELTME BÖLÜMÜ ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Tuval bulunduktan sonra Context'i al.
         if (canvas) {
             ctx = canvas.getContext('2d');
             resizeCanvas();
-            drawGraph(); // İlk boş grafiği çiz
+            drawGraph(); 
         } else {
-            console.error("Grafik tuvali (grafikCanvas) HTML'de bulunamadı. Lütfen HTML kodunu kontrol edin.");
+            console.error("Grafik tuvali bulunamadı.");
         }
-        updateUI(); // Bakiye ve bahis göstergesini güncelle
+        updateUI(); 
     });
-    // ------------------------------------------
 
     function resizeCanvas() {
         canvas.width = canvas.parentElement.clientWidth;
@@ -239,8 +224,6 @@
         uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
     
-    // --- OTO BET YENİ FONKSİYONLAR ---
-
     function toggleOtoBet() {
         if (oyunDurumu === 'oynuyor') return;
 
@@ -310,8 +293,6 @@
         }
     }
 
-    // --- GENEL OYUN FONKSİYONLARI ---
-
     function toggleOtoStrateji() {
         if(oyunDurumu === 'oynuyor') return; 
         
@@ -345,7 +326,6 @@
             return; 
         }
         
-        // Müzik hatasını engellemek için try/catch kullanıldı.
         try {
             if (backgroundMusic.paused) {
                  backgroundMusic.play().catch(e => console.warn("Müzik otomatik başlatılamadı:", e));
@@ -387,7 +367,6 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KONTROLÜ ---
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
             if (mevcutCarpan >= otoToplamaCarpani) {
                 oyunuBitir(true); 
@@ -395,7 +374,6 @@
             }
         }
         
-        // VOLATİLİTE MATEMATİĞİ
         dalgaFazı += 0.2; 
         let dalgaEtkisi = Math.sin(dalgaFazı) * 0.10; 
         let gurultu = (Math.random() - 0.5) * 0.15; 
@@ -419,14 +397,12 @@
 
         mevcutCarpan = yeniDeger;
 
-        // DİNAMİK ZOOM HESAPLAMA
         let hiz = Math.abs(gercekDegisim) * 20; 
         if (mevcutCarpan > 2.00) hiz += 0.5;
         
         let hedefZoom = 1.0 + Math.min(hiz, 0.4); 
         dinamikZoom += (hedefZoom - dinamikZoom) * 0.1; 
 
-        // CRASH KONTROLLERİ
         let patlamaSansi = 0.005; 
         if (mevcutCarpan < 0.50) patlamaSansi = 0.01; 
         if (mevcutCarpan > 2.0) patlamaSansi = 0.015;
@@ -444,7 +420,6 @@
             return;
         }
 
-        // VERİ KAYDI VE UI
         grafikNoktalari.push({ val: parseFloat(mevcutCarpan.toFixed(2)) });
         if(grafikNoktalari.length > 50) grafikNoktalari.shift();
 
@@ -523,6 +498,7 @@
         if(uiListe.children.length > 20) uiListe.lastElementChild.remove();
     }
 
+    // --- DİNAMİK GRAFİK ÇİZİMİ (AKILLI KAMERA SİSTEMİ) ---
     function drawGraph() {
         if (!ctx) return; 
 
@@ -537,15 +513,31 @@
         }
 
         canvas.style.transform = `scale(${dinamikZoom})`;
-        
-        let maxVal = 1.5; 
-        grafikNoktalari.forEach(p => { if(p.val > maxVal) maxVal = p.val; });
-        maxVal = maxVal * 1.2; 
 
         const w = canvas.width;
         const h = canvas.height;
-        const padding = 30;
+        const padding = 40; // Padding'i artırdık
 
+        // 1. Y-Ekseni Penceresini (Viewport) Hesapla
+        let maxY = 1.5;
+        // En yüksek tepeyi bul
+        grafikNoktalari.forEach(p => { if(p.val > maxY) maxY = p.val; });
+        // Tepenin biraz üstünü göster
+        maxY = maxY * 1.2; 
+
+        let minY = 0;
+        // Düşüşteyse veya Crash olduysa zemini aşağı kaydır
+        if (mevcutCarpan <= 0.01) {
+            minY = -0.05; // CRASH çizgisi net görünsün
+        } else if (mevcutCarpan < 0.8) {
+            // Dip görünümü için dinamik alt sınır
+            minY = Math.min(0, mevcutCarpan - 0.3); 
+        }
+        
+        // Pencere aralığı
+        let yRange = maxY - minY;
+
+        // 2. Çizgi Çizimi
         ctx.beginPath();
         ctx.lineWidth = 3;
         
@@ -555,15 +547,17 @@
 
         grafikNoktalari.forEach((p, i) => {
             let x = (i / (grafikNoktalari.length - 1)) * w;
-            let y = h - ((p.val / maxVal) * (h - padding));
+            // Yeni Y Formülü: Değeri pencere aralığına göre orantıla
+            let y = h - padding - ((p.val - minY) / yRange * (h - 2 * padding));
+            
             if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
         ctx.stroke();
 
-        // Kareler
+        // 3. Kareler (Düğümler) Çizimi
         grafikNoktalari.forEach((p, i) => {
             let x = (i / (grafikNoktalari.length - 1)) * w;
-            let y = h - ((p.val / maxVal) * (h - padding));
+            let y = h - padding - ((p.val - minY) / yRange * (h - 2 * padding));
 
             if (p.val <= 0.01) ctx.fillStyle = "#ff4d4d";
             else if (p.val < 1.00) ctx.fillStyle = "#ffaa00";
@@ -576,7 +570,8 @@
             } else {
                  ctx.shadowBlur = 0;
             }
-            ctx.fillRect(x - 4, y - 4, 8, 8);
+            // Kare boyutunu biraz büyüttük (8 -> 10)
+            ctx.fillRect(x - 5, y - 5, 10, 10);
         });
     }
 </script>
