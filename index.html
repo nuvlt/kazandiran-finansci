@@ -1,3 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kazandıran Finansçı - Oto-Bet Modu</title>
+    <style>
+        /* BASE CSS */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
+        .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
+        .title { font-size: 32px; font-weight: bold; color: #00ff7f; text-shadow: 0 0 5px #00ff7f; }
+        .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; }
+        .grafik-alani { position: relative; height: 350px; background-color: #0a1728; border: 2px solid #00ff7f; border-radius: 8px; margin-bottom: 20px; background-image: linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px); background-size: 40px 40px; overflow: hidden; }
+        .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; }
+        .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 20px rgba(255, 77, 77, 0.6); }
+        #grafikCanvas { position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; } 
+        .kontrol-paneli { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .hiz-ayarlari { grid-column: 1 / span 3; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .hiz-ayarlari button { background-color: #1e3d6d; color: #fff; padding: 8px 15px; border: 1px solid #1e90ff; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        .hiz-ayarlari button:hover { background-color: #1a5c96; }
+        .hiz-ayarlari .aktif { background-color: #1e90ff; border-color: #fff; font-weight: bold; }
+        .sonuclar-alani { background-color: #0a1728; border: 2px solid #1e90ff; border-radius: 5px; padding: 10px; height: 150px; overflow-y: auto; }
+        .sonuclar-liste { display: flex; flex-wrap: wrap; gap: 5px; }
+        .sonuc-item { background-color: #4b0082; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .sonuc-item.kayip { background-color: #3d0d0d; color: #ff6666; border: 1px solid #ff4d4d; }
+        .sonuc-item.kazanc { background-color: #0d3d1e; color: #66ff99; border: 1px solid #00ff7f; }
+        .bahis-kontrol { display: flex; flex-direction: column; gap: 8px; }
+        .bahis-butonlari { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .bahis-butonlari button { background-color: #333; color: #fff; padding: 10px 0; border: 1px solid #666; border-radius: 5px; cursor: pointer; }
+        .bahis-secim { display: flex; gap: 5px; }
+        .bahis-secim button { flex-grow: 1; padding: 10px 0; font-size: 16px; background-color: #1e3d6d; border: 1px solid #1e90ff; color: #fff; border-radius: 5px; cursor: pointer; }
+        .oyun-butonlari { display: flex; flex-direction: column; gap: 8px; }
+        #oynaToplaBtn { background-color: #00cc66; color: white; padding: 20px; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #00994d; }
+        #oynaToplaBtn:active { box-shadow: 0 2px #00994d; transform: translateY(3px); }
+        #oynaToplaBtn.topla-modu { background-color: #ffaa00; box-shadow: 0 5px #cc8800; }
+        #oynaToplaBtn.topla-modu:active { box-shadow: 0 2px #cc8800; }
+        .oto-ayarlar { grid-column: 1 / span 3; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding: 10px; border: 1px dashed #1e90ff; border-radius: 8px; }
+        .oto-strateji { display: flex; align-items: center; gap: 5px; background-color: #0a1728; padding: 8px; border-radius: 5px; }
+        .oto-strateji-grup { display: flex; flex-direction: column; align-items: center; }
+        #otoCarpanInput { width: 70px; padding: 5px; border: 1px solid #1e90ff; border-radius: 4px; background-color: #1e3d6d; color: #fff; text-align: center; font-size: 14px; }
+        #otoStratejiSwitch { min-width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer; }
+        #otoStratejiSwitch.on { background-color: #00ff7f; }
+        #otoStratejiSwitch .slider { width: 26px; height: 26px; background-color: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s; }
+        #otoStratejiSwitch.on .slider { transform: translateX(30px); }
+        .note { grid-column: 1 / span 3; font-size: 11px; color: #8899aa; text-align: center; margin-top: 5px; }
+        
+        /* YENİ OTO OYNATMA STİLLERİ */
+        .oto-input-group { display: flex; flex-direction: column; gap: 5px; }
+        .oto-input-group label { font-size: 12px; color: #aaa; }
+        .oto-input-group input, .oto-input-group select { padding: 8px; background-color: #1e3d6d; border: 1px solid #1e90ff; color: #fff; border-radius: 4px; }
+        #otoBaslatDurdurBtn { padding: 15px; font-size: 18px; font-weight: bold; background-color: #904100; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        #otoBaslatDurdurBtn.active { background-color: #ffaa00; }
+        
+        /* --- MOBİL UYUMLULUK (RESPONSIVE) CSS --- */
+        @media (max-width: 768px) {
+            .oyun-container { padding: 10px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .title { font-size: 24px; margin-bottom: 10px; }
+            .bakiye { font-size: 20px; }
+            .grafik-alani { height: 250px; }
+            .carpan-gosterge { font-size: 40px; top: 10px; }
+            
+            /* Kontrol paneli düzeni mobil için tek sütuna iner */
+            .kontrol-paneli { grid-template-columns: 1fr; gap: 10px; }
+            .sonuclar-alani { height: 100px; }
+            .hiz-ayarlari { grid-column: 1; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+            
+            /* Bahis ve Butonlar yan yana */
+            .oyun-butonlari { flex-direction: row; gap: 10px; }
+            #oynaToplaBtn { flex-grow: 1; padding: 15px; font-size: 18px; }
+            .oto-strateji { flex-shrink: 0; }
+            
+            /* Oto ayarları mobil için dikey */
+            .oto-ayarlar { grid-template-columns: 1fr; gap: 10px; padding: 10px 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="backgroundMusic" loop>
+    <source src="background.mp3" type="audio/mpeg">
+</audio>
+
+<div class="oyun-container">
+    <div class="header">
+        <div class="title">🚀 KAZANDIRAN FİNANSÇI</div>
+        <div class="bakiye" id="bakiyeGosterge">₺100.00</div>
+    </div>
+
+    <div class="grafik-alani">
+        <div class="carpan-gosterge" id="carpanGosterge">1.00x</div>
+        <canvas id="grafikCanvas"></canvas>
+    </div>
+
+    <div class="hiz-ayarlari">
+        <span style="font-weight: bold;">HIZ:</span>
+        <button onclick="setHiz(0.5)">0.50x</button>
+        <button class="aktif" onclick="setHiz(1.0)">1.00x</button>
+        <button onclick="setHiz(2.0)">2.00x</button>
+        <button onclick="setHiz(5.0)">5.00x</button>
+    </div>
+
+    <div class="kontrol-paneli">
+        <div class="sonuclar-alani">
+            <div class="sonuclar-liste" id="sonuclarListesi"></div>
+        </div>
+
+        <div class="bahis-kontrol">
+            <div class="bahis-secim">
+                <button onclick="ayarlaBahis(-10)">-</button>
+                <button style="flex-grow: 2;" id="aktifBahisGosterge">₺10.00</button>
+                <button onclick="ayarlaBahis(10)">+</button>
+            </div>
+            <div class="bahis-butonlari">
+                <button onclick="setBahis(10)">₺10</button>
+                <button onclick="setBahis(20)">₺20</button>
+                <button onclick="setBahis(50)">₺50</button>
+                <button onclick="setBahis(100)">₺100</button>
+            </div>
+        </div>
+
+        <div class="oyun-butonlari">
+            <button id="oynaToplaBtn" onclick="oynaVeyaTopla()">OYNA</button>
+            
+            <div class="oto-strateji">
+                <div class="oto-strateji-grup">
+                    <div id="otoStratejiSwitch" onclick="toggleOtoStrateji()"><div class="slider"></div></div>
+                    <span style="font-size: 10px;">OTO CASH OUT</span>
+                </div>
+
+                <div class="oto-strateji-grup" style="flex-grow: 1;">
+                    <input type="number" id="otoCarpanInput" value="1.20" min="1.01" step="0.01">
+                    <span style="font-size: 10px;">TOPLAMA ÇARPANI</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="oto-ayarlar">
+            <button id="otoBaslatDurdurBtn" onclick="toggleOtoBet()">OTO OYNATMAYI BAŞLAT</button>
+
+            <div class="oto-input-group">
+                <label for="tekrarSayisi">Tekrar Sayısı (Max)</label>
+                <input type="number" id="tekrarSayisi" value="10" min="1">
+            </div>
+
+            <div class="oto-input-group">
+                <label for="kayipStratejisi">Kayıpta Bahis</label>
+                <select id="kayipStratejisi">
+                    <option value="aynı">Aynı Tut</option>
+                    <option value="iki_kat">İki Katına Çıkar (Martingale)</option>
+                    <option value="baslangic">Başlangıca Dön</option>
+                </select>
+            </div>
+            
+            <div class="oto-input-group">
+                <label for="kazancStratejisi">Kazançta Bahis</label>
+                <select id="kazancStratejisi">
+                    <option value="aynı">Aynı Tut</option>
+                    <option value="iki_kat">İki Katına Çıkar</option>
+                    <option value="baslangic">Başlangıca Dön</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="note">Kazançlarda %32 kesinti uygulanır. Max Kazanç: ₺10.000.000</div>
+    </div>
+</div>
+
 <script>
     const MAX_KAZANC = 10000000.00;
     let UPDATE_INTERVAL = 150; 
@@ -5,7 +174,7 @@
     // BAKIYE VE BAHİS
     let bakiye = 100.00;
     let aktifBahis = 10.00;
-    const BASLANGIC_BAHIS = 10.00; // Martingale için başlangıç bahsi
+    const BASLANGIC_BAHIS = 10.00; 
     
     let oyunDurumu = 'bekliyor'; 
     let mevcutCarpan = 1.00;
@@ -18,7 +187,7 @@
     let otoToplamaCarpani = 1.20; 
     let otoBetAktif = false;
     let oynananElSayisi = 0;
-    let sonElDurumu = 'baslangic'; // 'kazanç', 'kayıp', 'baslangic'
+    let sonElDurumu = 'baslangic'; 
 
     // Volatilite Değişkenleri
     let grafikNoktalari = []; 
@@ -26,14 +195,13 @@
     let anaTrend = 0; 
     let dinamikZoom = 1.0; 
 
-    // DOM
+    // DOM DEĞİŞKENLERİ
     const uiBakiye = document.getElementById('bakiyeGosterge');
     const uiBahis = document.getElementById('aktifBahisGosterge');
     const uiCarpan = document.getElementById('carpanGosterge');
     const uiBtn = document.getElementById('oynaToplaBtn');
     const uiListe = document.getElementById('sonuclarListesi');
     const canvas = document.getElementById('grafikCanvas');
-    const ctx = canvas.getContext('2d');
     const backgroundMusic = document.getElementById('backgroundMusic');
     
     // OTO DOM
@@ -44,8 +212,22 @@
     const kayipStratejisiSelect = document.getElementById('kayipStratejisi');
     const kazancStratejisiSelect = document.getElementById('kazancStratejisi');
 
-    // Başlangıçta UI ayarı
-    updateUI(); 
+    // KRİTİK: getContext buraya taşındı.
+    let ctx; 
+
+    // --- KRİTİK BAŞLATMA VE DÜZELTME BÖLÜMÜ ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tuval bulunduktan sonra Context'i al.
+        if (canvas) {
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            drawGraph(); // İlk boş grafiği çiz
+        } else {
+            console.error("Grafik tuvali (grafikCanvas) HTML'de bulunamadı. Lütfen HTML kodunu kontrol edin.");
+        }
+        updateUI(); // Bakiye ve bahis göstergesini güncelle
+    });
+    // ------------------------------------------
 
     function resizeCanvas() {
         canvas.width = canvas.parentElement.clientWidth;
@@ -53,12 +235,6 @@
         if(grafikNoktalari.length > 0) drawGraph();
     }
     window.addEventListener('resize', resizeCanvas);
-    // İlk yüklemede tuval boyutunu ayarla
-    document.addEventListener('DOMContentLoaded', () => {
-        resizeCanvas();
-        // Boş grafiği göster
-        drawGraph();
-    });
 
     function updateUI() {
         uiBakiye.textContent = `₺${bakiye.toFixed(2)}`;
@@ -171,7 +347,7 @@
             return; 
         }
         
-        // KRİTİK DÜZELTME: Müzik hatasını engellemek için try/catch kullanıldı.
+        // Müzik hatasını engellemek için try/catch kullanıldı.
         try {
             if (backgroundMusic.paused) {
                  backgroundMusic.play().catch(e => console.warn("Müzik otomatik başlatılamadı:", e));
@@ -198,7 +374,6 @@
         uiCarpan.style.color = "#00ff7f";
         
         sonGuncellemeZamani = performance.now();
-        // BURADA OYUN DÖNGÜSÜ BAŞLIYOR
         animasyonFrameId = requestAnimationFrame(oyunDongusu);
     }
 
@@ -210,7 +385,6 @@
             sonGuncellemeZamani = zaman;
             birAdimIlerle();
         }
-        // Bir sonraki kareyi çağırmaya devam et
         requestAnimationFrame(oyunDongusu);
     }
 
@@ -352,9 +526,11 @@
     }
 
     function drawGraph() {
+        // ctx null değilse çizim yap
+        if (!ctx) return; 
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Başlangıçta boş tuvali göster
         if (grafikNoktalari.length < 2 && oyunDurumu !== 'oynuyor') {
              ctx.font = '24px Arial';
              ctx.fillStyle = '#1e90ff';
@@ -407,3 +583,6 @@
         });
     }
 </script>
+
+</body>
+</html>
