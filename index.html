@@ -3,14 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👴 Zengin Dede - Final Sürüm</title>
+    <title>👴 Zengin Dede - Ses Kontrollü</title>
     <style>
         /* BASE CSS */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1e3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
-        .oyun-container { width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
+        
+        /* Container relative yapıldı ki ses butonu içinde konumlanabilsin */
+        .oyun-container { position: relative; width: 800px; max-width: 95%; background-color: #0f274a; border: 4px solid #1e90ff; border-radius: 10px; padding: 20px; box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); }
+        
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e90ff; }
         .title { font-size: 32px; font-weight: bold; color: #00ff7f; text-shadow: 0 0 5px #00ff7f; }
-        .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; }
+        .bakiye { font-size: 24px; color: #fff; background-color: #0f274a; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e90ff; margin-right: 50px; /* Ses butonu için boşluk */ }
+        
+        /* YENİ SES BUTONU STİLİ */
+        .ses-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #1e3d6d;
+            border: 1px solid #1e90ff;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .ses-btn:hover { background-color: #1e90ff; box-shadow: 0 0 10px #1e90ff; }
+
         .grafik-alani { position: relative; height: 350px; background-color: #0a1728; border: 2px solid #00ff7f; border-radius: 8px; margin-bottom: 20px; background-image: linear-gradient(rgba(26, 61, 109, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 61, 109, 0.3) 1px, transparent 1px); background-size: 40px 40px; overflow: hidden; }
         .carpan-gosterge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 56px; font-weight: 800; color: #00ff7f; text-shadow: 0 0 20px rgba(0, 255, 127, 0.4); z-index: 10; background-color: rgba(10, 23, 40, 0.7); padding: 5px 20px; border-radius: 10px; border: 1px solid #1e90ff; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
         .carpan-gosterge.crash { color: #ff4d4d; text-shadow: 0 0 30px rgba(255, 77, 77, 0.8); border-color: #ff4d4d; }
@@ -64,6 +89,9 @@
             #oynaToplaBtn { flex-grow: 1; padding: 15px; font-size: 18px; }
             .oto-strateji { flex-shrink: 0; }
             .oto-ayarlar { grid-template-columns: 1fr; gap: 10px; padding: 10px 5px; }
+            
+            /* Mobil ses butonu ayarı */
+            .ses-btn { top: 10px; right: 10px; width: 35px; height: 35px; font-size: 16px; }
         }
     </style>
 </head>
@@ -74,6 +102,8 @@
 </audio>
 
 <div class="oyun-container">
+    <button id="sesButonu" class="ses-btn" onclick="toggleSes()">🔇</button>
+
     <div class="header">
         <div class="title">👴💰 ZENGİN DEDE</div>
         <div class="bakiye" id="bakiyeGosterge">₺100.00</div>
@@ -194,6 +224,7 @@
     const uiListe = document.getElementById('sonuclarListesi');
     const canvas = document.getElementById('grafikCanvas');
     const backgroundMusic = document.getElementById('backgroundMusic');
+    const sesBtn = document.getElementById('sesButonu');
     
     // OTO DOM
     const otoSwitch = document.getElementById('otoStratejiSwitch');
@@ -230,22 +261,31 @@
         uiBahis.textContent = `₺${aktifBahis.toFixed(2)}`;
     }
     
+    // --- YENİ SES KONTROLÜ ---
+    function toggleSes() {
+        if (backgroundMusic.paused) {
+            backgroundMusic.play().then(() => {
+                backgroundMusic.muted = false;
+                sesBtn.textContent = "🔊";
+            }).catch(e => console.log("Ses başlatma hatası:", e));
+        } else {
+            backgroundMusic.muted = !backgroundMusic.muted;
+            sesBtn.textContent = backgroundMusic.muted ? "🔇" : "🔊";
+        }
+    }
+
     // --- OTO STRATEJİ GÜNCELLEME FONKSİYONU ---
     function guncelleOtoCarpan() {
         let val = parseFloat(otoCarpanInput.value);
-        // Minimum çarpanı 1.01 olarak zorla
         if (isNaN(val) || val < 1.01) val = 1.01;
         otoToplamaCarpani = val;
     }
     
-    // Input kutusuna yazıldıkça değeri sürekli güncel tut.
     otoCarpanInput.addEventListener('input', guncelleOtoCarpan);
-    // Kutudan çıkıldığında veya Enter'a basıldığında değeri formatla.
     otoCarpanInput.addEventListener('change', () => {
         guncelleOtoCarpan();
         otoCarpanInput.value = otoToplamaCarpani.toFixed(2);
     });
-    // ------------------------------------------
 
     function toggleOtoBet() {
         if (oyunDurumu === 'oynuyor') return;
@@ -347,17 +387,15 @@
             return; 
         }
         
-        // KRİTİK: OTO CASH OUT DEĞERİNİ SADECE AKTİFSE ZORLA GÜNCELLE
+        // Zorunlu Değer Güncelleme
         if (otoStratejiAktif) {
             guncelleOtoCarpan(); 
         }
         
-        try {
-            if (backgroundMusic.paused) {
-                 backgroundMusic.play().catch(e => console.warn("Müzik otomatik başlatılamadı:", e));
-            }
-        } catch (e) {
-            console.warn("Müzik hatası:", e);
+        // Müzik Başlatma (Buton üzerinden kontrol edildiği için burayı opsiyonel yapıyoruz)
+        // Ama ilk tıklamada başlaması için:
+        if (backgroundMusic.paused && backgroundMusic.currentTime > 0) {
+             backgroundMusic.play().catch(e => {});
         }
 
         bakiye -= aktifBahis;
@@ -393,9 +431,8 @@
     }
 
     function birAdimIlerle() {
-        // --- OTO TOPLAMA KRİTİK KONTROL (KAYAN NOKTA HASSASİYETİ DÜZELTİLDİ) ---
+        // --- OTO TOPLAMA KRİTİK KONTROL ---
         if (otoStratejiAktif && oyunDurumu === 'oynuyor') {
-            // Kontrol için iki ondalık basamağa yuvarlayarak karşılaştırma yapılır.
             const yuvarlakMevcutCarpan = Math.round(mevcutCarpan * 100) / 100;
             const yuvarlakHedefCarpan = Math.round(otoToplamaCarpani * 100) / 100;
             
@@ -404,9 +441,7 @@
                 return;
             }
         }
-        // --------------------------------------------------------------------------
         
-        // OYUN İSTATİSTİKLERİ VE VOLATİLİTE HESAPLARI
         dalgaFazı += 0.2; 
         let dalgaEtkisi = Math.sin(dalgaFazı) * 0.10; 
         let gurultu = (Math.random() - 0.5) * 0.15; 
@@ -472,7 +507,9 @@
         cancelAnimationFrame(animasyonFrameId);
         uiBtn.textContent = "OYNA";
         uiBtn.classList.remove('topla-modu');
-        backgroundMusic.pause();
+        // Müzik durdurma isteğe bağlı, oyun bitince devam etsin ister misiniz? 
+        // Genelde devam eder, ama crash olunca duralım:
+        if(!kullaniciTopladi) backgroundMusic.pause(); 
 
         let kazancMiktari = 0;
         let isWin = false;
@@ -597,6 +634,3 @@
         });
     }
 </script>
-
-</body>
-</html>
