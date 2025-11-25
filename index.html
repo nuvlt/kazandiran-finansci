@@ -49,7 +49,7 @@
             padding: 10px; 
             height: 150px; 
             overflow-y: auto; 
-            grid-column: 1; /* Masaüstü için solda kalsın */
+            grid-column: 1; 
         }
         .sonuclar-liste { display: flex; flex-wrap: wrap; gap: 5px; }
         .sonuc-item { background-color: #4b0082; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
@@ -61,7 +61,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 8px; 
-            grid-column: 2; /* Masaüstü için ortada kalsın */
+            grid-column: 2; 
         }
         .bahis-butonlari { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .bahis-butonlari button { background-color: #333; color: #fff; padding: 10px 0; border: 1px solid #666; border-radius: 5px; cursor: pointer; }
@@ -71,16 +71,17 @@
             display: flex; 
             flex-direction: column; 
             gap: 8px;
-            grid-column: 3; /* Masaüstü için sağda kalsın */
+            grid-column: 3; 
         }
         #oynaToplaBtn { background-color: #00cc66; color: white; padding: 20px; border: none; border-radius: 8px; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #00994d; }
         #oynaToplaBtn:active { box-shadow: 0 2px #00994d; transform: translateY(3px); }
         #oynaToplaBtn.topla-modu { background-color: #ffaa00; box-shadow: 0 5px #cc8800; }
         #oynaToplaBtn.topla-modu:active { box-shadow: 0 2px #cc8800; }
+        #oynaToplaBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* OTO AYARLAR */
         .oto-ayarlar { grid-column: 1 / span 3; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding: 10px; border: 1px dashed #1e90ff; border-radius: 8px; }
-        .oto-strateji { display: flex; align-items: center; gap: 5px; background-color: #0a1728; padding: 8px; border-radius: 5px; }
+        .oto-strateji { display: flex; align-items: center; gap: 5px; background-color: #0a1728; padding: 8px; border-radius: 5px; justify-content: center; } /* Ortaya hizalama eklendi */
         .oto-strateji-grup { display: flex; flex-direction: column; align-items: center; }
         #otoCarpanInput { width: 70px; padding: 5px; border: 1px solid #1e90ff; border-radius: 4px; background-color: #1e3d6d; color: #fff; text-align: center; font-size: 14px; }
         #otoStratejiSwitch { min-width: 60px; height: 30px; background-color: #333; border-radius: 15px; position: relative; cursor: pointer; }
@@ -111,70 +112,69 @@
                 gap: 10px; 
             }
 
-            /* HIZ AYARLARI */
+            /* HIZ AYARLARI FIX */
             .hiz-ayarlari { 
                 grid-column: 1; 
                 flex-wrap: wrap; 
                 justify-content: space-between; 
                 margin-bottom: 10px; 
-                order: 1; /* Üstte kalsın */
+                order: 1; 
+                gap: 5px; /* Butonlar arasındaki boşluğu azalt */
             }
             .hiz-ayarlari button {
-                flex-grow: 1;
+                width: 22%; /* 4 butonun yan yana sığması için */
                 font-size: 12px;
-                padding: 6px 10px;
+                padding: 6px 0; /* Dikey padding azalt */
+                margin: 0;
             }
 
             /* BAHİS KONTROL DÜZELTMESİ */
             .bahis-kontrol {
                 order: 2;
-                gap: 10px;
-            }
-            .bahis-secim {
-                gap: 5px;
+                gap: 8px; /* Dikey boşluğu azalt */
             }
             .bahis-secim button {
                 padding: 8px 0;
                 font-size: 14px;
             }
-            .bahis-butonlari {
-                gap: 5px;
-            }
-
-            /* OYNA BUTONU VE OTO STRATEJİ DÜZELTMESİ */
+            
+            /* OYNA BUTONU VE OTO STRATEJİ DÜZELTMESİ FIX */
             .oyun-butonlari { 
                 flex-direction: row; 
+                justify-content: space-between;
+                align-items: stretch; /* Yüksekliği yay */
                 gap: 10px; 
                 order: 3;
-                align-items: center;
-                justify-content: space-between;
                 padding: 5px 0;
             }
             #oynaToplaBtn { 
                 flex-grow: 1; 
                 padding: 15px; 
                 font-size: 18px; 
+                min-width: 45%; 
+                height: 100%; 
             }
             .oto-strateji { 
-                flex-shrink: 0; 
-                flex-grow: 0;
+                flex-grow: 1;
+                width: 45%; 
                 padding: 5px;
-                width: 150px; /* Oto strateji düğmesini küçülttük */
-                justify-content: center;
             }
             .oto-strateji-grup {
                 gap: 2px;
             }
             
-            /* SONUÇLAR ALANI DÜZELTMESİ (Daha görünür hale getirildi) */
+            /* SONUÇLAR ALANI DÜZELTMESİ */
             .sonuclar-alani { 
-                grid-column: 1; /* Tek sütuna yayılsın */
-                order: 4; /* Alt kısma gitsin */
-                height: 80px; /* Görünürlüğü artırıldı */
+                grid-column: 1; 
+                order: 4; 
+                height: 60px; /* Daha az yer kapla */
                 padding: 8px;
             }
             .sonuclar-liste {
-                justify-content: center;
+                justify-content: flex-start; /* Sola hizala */
+                flex-wrap: nowrap; /* Tek satırda kalmasını sağla */
+                overflow-x: auto; /* Yatay kaydırma ekle */
+                padding-bottom: 5px;
             }
 
             /* OTO AYARLAR */
@@ -434,6 +434,11 @@
                     carpanGosterge.style.color = '#ffffff';
                     carpanGosterge.style.textShadow = 'none';
                 }
+
+                // Oto strateji veya manuel Cash-Out için butonu güncelle
+                if (bahisYapildi && !cekildi) {
+                    oynaToplaBtn.innerHTML = `TOPLA @ ${gorunenCarpan}x`;
+                }
             }
 
             grafikNoktalari.push(anlikCarpan);
@@ -454,6 +459,13 @@
             carpanGosterge.innerHTML = 'BAŞLIYOR...';
             
             setTimeout(() => {
+                // Tur gerçekten başladı
+                if (bahisYapildi) {
+                    oynaToplaBtn.disabled = false; // Cash-out için butonu etkinleştir
+                    oynaToplaBtn.innerHTML = `TOPLA @ 1.00x`; 
+                    oynaToplaBtn.classList.add('topla-modu');
+                }
+                
                 intervalId = setInterval(carpanGuncelle, 50 / oyunHizi); // 50ms/hız
             }, 1500 / oyunHizi); // 1.5 saniye bekleme
         }, 500); // 0.5 saniye bekleme
@@ -476,7 +488,8 @@
             
             // UI Güncelle
             oynaToplaBtn.innerHTML = 'Bekleniyor...';
-            oynaToplaBtn.disabled = true;
+            oynaToplaBtn.disabled = true; // Oyun başlayana kadar Cash-out'u engelle
+            oynaToplaBtn.classList.remove('topla-modu');
 
             // Oyunu Başlat
             oyunDurumu = 'basladi';
@@ -494,7 +507,7 @@
         bakiye += kazanilanMiktar;
         bakiyeGuncelle();
         
-        oynaToplaBtn.innerHTML = `TOPLA (${anlikCarpan.toFixed(2)}x)`;
+        oynaToplaBtn.innerHTML = `KAZANÇ ₺${(kazanilanMiktar).toFixed(2)}`;
         oynaToplaBtn.classList.add('topla-modu');
         oynaToplaBtn.disabled = true; // Tekrar çekilmesini engelle
 
@@ -515,10 +528,8 @@
             oynaToplaBtn.disabled = true;
             sonBahisKazanildi = false;
         } else if (cekildi) {
-            // Başarılı Cash-out oldu
-            oynaToplaBtn.innerHTML = `₺${(bahisMiktari * anlikCarpan).toFixed(2)}`;
-            oynaToplaBtn.classList.add('topla-modu');
-            oynaToplaBtn.disabled = true;
+            // Başarılı Cash-out oldu (buton zaten güncellenmişti)
+            // Sadece tekrar tıklamayı engelle
         } else if (!bahisYapildi) {
              // Bahis yapılmadı, sadece izlendi
              oynaToplaBtn.innerHTML = 'OYNA';
@@ -628,6 +639,8 @@
 
     // Oto Oynatma Kontrolü
     const otoOynatBaslatDurdur = () => {
+        if (oyunDurumu !== 'bekliyor' && otoOynatmaAktif) return; // Tur devam ediyorsa sadece durdurulabilir
+        
         otoOynatmaAktif = !otoOynatmaAktif;
         if (otoOynatmaAktif) {
             otoTurSayisi = parseInt(tekrarSayisiInput.value) || 10;
@@ -644,8 +657,8 @@
         if (!otoOynatmaAktif || oyunDurumu !== 'bekliyor') return;
 
         // Bahis Miktarı Ayarlama Stratejisi
-        if (otoTurSayisi < parseInt(tekrarSayisiInput.value) && otoTurSayisi >= 0) {
-            // Bir önceki tur sonucuna göre bahis miktarını güncelle
+        // Tur 1'den büyükse (yani ilk tur değilse) önceki sonucun stratejisini uygula
+        if (otoTurSayisi < parseInt(tekrarSayisiInput.value) - 1) { 
             if (sonBahisKazanildi) {
                 if (kazanincaInput.value === 'reset') {
                     bahisAyarla(baslangicBahisMiktari);
@@ -664,6 +677,9 @@
         // Oyna fonksiyonunu çağır
         oyunBaslatDurdur();
     };
+    
+    // Başlangıçta bahis miktarını input ile eşle
+    bahisAyarla(parseFloat(bahisMiktarInput.value));
 
 </script>
 
